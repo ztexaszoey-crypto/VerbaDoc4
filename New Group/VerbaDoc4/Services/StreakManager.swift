@@ -22,7 +22,7 @@ final class StreakManager {
             if calendar.isDate(previousDate, inSameDayAs: date) {
                 newStreak = currentStreak
             } else if let yesterday = calendar.date(byAdding: .day, value: -1, to: date), calendar.isDate(previousDate, inSameDayAs: yesterday) {
-                newStreak = max(1, currentStreak + 1)
+                newStreak = currentStreak + 1
             } else {
                 newStreak = 1
             }

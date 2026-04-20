@@ -36,7 +36,6 @@ struct AddMaterialView: View {
 
         let generated = generator.generateItems(from: text, documentTitle: document.title)
         for item in generated {
-            modelContext.insert(item)
             document.studyItems?.append(item)
         }
 

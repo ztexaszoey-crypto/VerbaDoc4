@@ -10,8 +10,8 @@ struct TodayPracticeView: View {
         VStack(spacing: 20) {
             if dueItems.isEmpty {
                 ContentUnavailableView("No cards due", systemImage: "checkmark.circle")
-            } else {
-                let item = dueItems[min(index, dueItems.count - 1)]
+            } else if dueItems.indices.contains(index) {
+                let item = dueItems[index]
 
                 Text(item.question)
                     .font(.title3.bold())
@@ -35,6 +35,11 @@ struct TodayPracticeView: View {
                     showAnswer = false
                 }
                 .buttonStyle(VerbaButtonStyle())
+            } else {
+                ProgressView()
+                    .onAppear {
+                        index = max(0, dueItems.count - 1)
+                    }
             }
 
             Spacer()
