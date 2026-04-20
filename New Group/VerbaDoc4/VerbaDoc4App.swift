@@ -10,7 +10,7 @@ import SwiftData
 
 @main
 struct VerbaDoc4App: App {
-    @AppStorage("hasOnboarded") private var hasOnboarded = false
+    @AppStorage(AppState.hasOnboardedKey) private var hasOnboarded = false
     @State private var showSplash = true
     let modelContainer: ModelContainer
 

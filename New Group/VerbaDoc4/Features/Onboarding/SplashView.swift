@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct SplashView: View {
+    private let splashDuration: TimeInterval = 1.2
+
     @Binding var isFinished: Bool
     @State private var scale: CGFloat = 0.85
 
@@ -28,7 +30,7 @@ struct SplashView: View {
             withAnimation(.spring(response: 0.55, dampingFraction: 0.75)) {
                 scale = 1.0
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + splashDuration) {
                 isFinished = true
             }
         }

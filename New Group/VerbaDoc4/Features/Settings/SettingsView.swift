@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @AppStorage("hasOnboarded") private var hasOnboarded = false
+    @AppStorage(AppState.hasOnboardedKey) private var hasOnboarded = false
     @StateObject private var streakManager = StreakManager()
     @StateObject private var appState = AppState()
     @State private var showPaywall = false

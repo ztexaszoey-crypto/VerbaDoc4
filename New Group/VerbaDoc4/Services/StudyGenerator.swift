@@ -1,6 +1,9 @@
 import Foundation
 
 enum StudyGenerator {
+    private static let fallbackQuestionWordCount = 8
+    private static let fallbackAnswerWordCount = 6
+
     static func generateCards(from text: String, documentTitle: String? = nil, maxCards: Int = 20) -> [StudyItem] {
         guard maxCards > 0 else { return [] }
 
@@ -61,8 +64,11 @@ enum StudyGenerator {
         if cards.isEmpty {
             let words = cleanedText.split(whereSeparator: { !$0.isLetter && !$0.isNumber }).map(String.init)
             if words.count >= 6 {
-                let question = words.prefix(8).joined(separator: " ")
-                let answer = words.dropFirst(8).prefix(6).joined(separator: " ")
+                let question = words.prefix(fallbackQuestionWordCount).joined(separator: " ")
+                let answer = words
+                    .dropFirst(fallbackQuestionWordCount)
+                    .prefix(fallbackAnswerWordCount)
+                    .joined(separator: " ")
                 cards.append(
                     StudyItem(
                         question: "Continue this thought: \(question)…",

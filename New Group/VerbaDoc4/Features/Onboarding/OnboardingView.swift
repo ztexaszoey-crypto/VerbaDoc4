@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct OnboardingView: View {
-    @AppStorage("hasOnboarded") private var hasOnboarded = false
+    @AppStorage(AppState.hasOnboardedKey) private var hasOnboarded = false
     @State private var stepIndex = 0
 
     private var step: VerbaCharacter { VerbaCharacter.onboardingSteps[stepIndex] }

@@ -4,21 +4,22 @@ import Security
 
 @MainActor
 final class AppState: ObservableObject {
+    static let hasOnboardedKey = "hasOnboarded"
+
     @Published var hasPremium: Bool = false
     @Published var onboardingCompleted: Bool
 
-    private let hasOnboardedKey = "hasOnboarded"
     private let premiumService = "com.zoey.verbadoc4.premium"
     private let premiumAccount = "premium_status"
 
     init() {
-        onboardingCompleted = UserDefaults.standard.bool(forKey: hasOnboardedKey)
+        onboardingCompleted = UserDefaults.standard.bool(forKey: Self.hasOnboardedKey)
         hasPremium = (try? KeychainStore.loadString(service: premiumService, account: premiumAccount)) == "true" || EntitlementsChecker.hasPremiumEntitlement
     }
 
     func completeOnboarding() {
         onboardingCompleted = true
-        UserDefaults.standard.set(true, forKey: hasOnboardedKey)
+        UserDefaults.standard.set(true, forKey: Self.hasOnboardedKey)
     }
 
     @discardableResult
