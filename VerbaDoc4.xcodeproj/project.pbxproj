@@ -32,7 +32,7 @@
 		C4FB92352F92B4FA004161CC = {
 			isa = PBXGroup;
 			children = (
-				C4FB92402F92B4FA004161CC /* VerbaDoc4 */,
+				C4FB925F2F96E0A5004161CC /* New Group */,
 				C4FB923F2F92B4FA004161CC /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +43,14 @@
 				C4FB923E2F92B4FA004161CC /* VerbaDoc4.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		C4FB925F2F96E0A5004161CC /* New Group */ = {
+			isa = PBXGroup;
+			children = (
+				C4FB92402F92B4FA004161CC /* VerbaDoc4 */,
+			);
+			path = "New Group";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

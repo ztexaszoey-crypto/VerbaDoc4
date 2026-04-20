@@ -1,0 +1,30 @@
+import SwiftUI
+import SwiftData
+
+struct RootTabView: View {
+    enum Tab { case today, library, practice, settings }
+    @State private var selected: Tab = .today
+    @Query(filter: #Predicate<StudyItem> { $0.nextReviewAt <= Date() }) private var dueItems: [StudyItem]
+
+    var body: some View {
+        TabView(selection: $selected) {
+            TodayView()
+                .tabItem { Label("Today", systemImage: "calendar.circle.fill") }
+                .tag(Tab.today)
+                .badge(dueItems.isEmpty ? 0 : dueItems.count)
+
+            LibraryView()
+                .tabItem { Label("Library", systemImage: "books.vertical.fill") }
+                .tag(Tab.library)
+
+            PracticeView()
+                .tabItem { Label("Practice", systemImage: "rectangle.stack.fill") }
+                .tag(Tab.practice)
+
+            SettingsView()
+                .tabItem { Label("Settings", systemImage: "gear") }
+                .tag(Tab.settings)
+        }
+        .tint(VerbaTheme.green)
+    }
+}
