@@ -25,7 +25,7 @@ struct PaywallView: View {
                 .verbaCard()
 
                 Button("Unlock Premium") {
-                    _ = appState.redeem(code: "VERBADOC4FREE")
+                    appState.unlockPremium()
                     dismiss()
                 }
                 .buttonStyle(VerbaButtonStyle())

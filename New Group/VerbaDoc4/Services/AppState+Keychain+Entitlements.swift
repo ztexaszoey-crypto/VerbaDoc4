@@ -5,6 +5,7 @@ import Security
 @MainActor
 final class AppState: ObservableObject {
     static let hasOnboardedKey = "hasOnboarded"
+    static let premiumRedeemCode = "VERBADOC4FREE"
 
     @Published var hasPremium: Bool = false
     @Published var onboardingCompleted: Bool
@@ -28,10 +29,14 @@ final class AppState: ObservableObject {
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .uppercased()
 
-        guard normalized == "VERBADOC4FREE" else { return false }
+        guard normalized == Self.premiumRedeemCode else { return false }
+        unlockPremium()
+        return true
+    }
+
+    func unlockPremium() {
         hasPremium = true
         try? KeychainStore.saveString("true", service: premiumService, account: premiumAccount)
-        return true
     }
 }
 

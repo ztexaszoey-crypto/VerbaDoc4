@@ -12,6 +12,8 @@ import SwiftData
 struct VerbaDoc4App: App {
     @AppStorage(AppState.hasOnboardedKey) private var hasOnboarded = false
     @State private var showSplash = true
+    @StateObject private var appState = AppState()
+    @StateObject private var streakManager = StreakManager()
     let modelContainer: ModelContainer
 
     init() {
@@ -41,6 +43,8 @@ struct VerbaDoc4App: App {
             }
             .animation(.easeInOut(duration: 0.3), value: showSplash)
             .animation(.easeInOut(duration: 0.3), value: hasOnboarded)
+            .environmentObject(appState)
+            .environmentObject(streakManager)
             .modelContainer(modelContainer)
         }
     }

@@ -45,7 +45,7 @@ enum StudyGenerator {
                 continue
             }
 
-            let masked = segment.replacingOccurrences(of: focusWord, with: "____", options: [.caseInsensitive, .diacriticInsensitive], range: segment.range(of: focusWord))
+            let masked = segment.replacingOccurrences(of: focusWord, with: "____", options: [.caseInsensitive, .diacriticInsensitive])
             guard masked != segment else { continue }
 
             let explanationPrefix = documentTitle?.isEmpty == false ? "From \(documentTitle!):" : "From your material:"

@@ -79,7 +79,7 @@ struct TodayPracticeView: View {
 
         switch rating {
         case .again:
-            item.reps = max(0, item.reps - 1)
+            item.reps = 0
             item.intervalDays = 0
             item.nextReviewAt = Date()
             item.lastRating = "again"
