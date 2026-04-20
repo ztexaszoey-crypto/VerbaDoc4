@@ -29,7 +29,7 @@ struct SplashView: View {
                 scale = 1.0
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                isFinished = false
+                isFinished = true
             }
         }
     }

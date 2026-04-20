@@ -46,13 +46,13 @@ struct DocumentDetailView: View {
         let generated = StudyGenerator.generateCards(from: document.extractedText, documentTitle: document.title, maxCards: 20)
         guard !generated.isEmpty else { return }
 
-        var existing = Set((document.studyItems ?? []).map { $0.question.lowercased() })
+        var existingQuestions = Set((document.studyItems ?? []).map { $0.question.lowercased() })
         for item in generated {
             let key = item.question.lowercased()
-            guard !existing.contains(key) else { continue }
+            guard !existingQuestions.contains(key) else { continue }
             modelContext.insert(item)
             document.studyItems?.append(item)
-            existing.insert(key)
+            existingQuestions.insert(key)
         }
     }
 }
