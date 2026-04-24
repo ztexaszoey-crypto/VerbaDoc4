@@ -2,7 +2,7 @@ import SwiftUI
 
 struct RedeemCodeView: View {
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject var appState: AppState
+    @EnvironmentObject private var appState: AppState
 
     @State private var code = ""
     @State private var showError = false

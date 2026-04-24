@@ -2,7 +2,7 @@ import SwiftUI
 
 struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject var appState: AppState
+    @EnvironmentObject private var appState: AppState
     @State private var showRedeem = false
 
     var body: some View {
@@ -44,7 +44,7 @@ struct PaywallView: View {
                 }
             }
             .sheet(isPresented: $showRedeem) {
-                RedeemCodeView(appState: appState)
+                RedeemCodeView()
             }
         }
     }

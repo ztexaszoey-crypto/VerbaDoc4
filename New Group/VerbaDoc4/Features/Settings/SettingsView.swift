@@ -45,7 +45,7 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .sheet(isPresented: $showPaywall) {
-                PaywallView(appState: appState)
+                PaywallView()
             }
         }
     }
