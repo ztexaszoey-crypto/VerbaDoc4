@@ -12,7 +12,10 @@ struct StudyTask: Codable {
 
 enum GroqAPI {
     private static let endpoint = URL(string: "https://api.groq.com/openai/v1/chat/completions")!
+    /// llama3-8b-8192: 8B parameter LLaMA 3 model with an 8,192-token context window.
     private static let model = "llama3-8b-8192"
+    /// Maximum characters of source text sent to the API to stay within the model's context window.
+    private static let maxInputTextLength = 3000
 
     enum GroqAPIError: Error {
         case invalidResponse
@@ -36,7 +39,7 @@ enum GroqAPI {
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        let truncatedText = String(text.prefix(3000))
+        let truncatedText = String(text.prefix(maxInputTextLength))
         let systemPrompt = """
         You are a helpful study assistant that creates concise flashcard pairs. \
         Return ONLY a valid JSON array where each element has exactly these fields: \
