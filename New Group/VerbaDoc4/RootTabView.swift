@@ -4,7 +4,12 @@ import SwiftData
 struct RootTabView: View {
     enum Tab { case today, library, practice, settings }
     @State private var selected: Tab = .today
-    @Query(filter: #Predicate<StudyItem> { $0.nextReviewAt <= Date() }) private var dueItems: [StudyItem]
+    @Query private var allStudyItems: [StudyItem]
+
+    private var dueItems: [StudyItem] {
+        let now = Date()
+        return allStudyItems.filter { $0.nextReviewAt <= now }
+    }
 
     var body: some View {
         TabView(selection: $selected) {

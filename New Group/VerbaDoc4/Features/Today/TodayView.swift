@@ -2,7 +2,12 @@ import SwiftUI
 import SwiftData
 
 struct TodayView: View {
-    @Query(filter: #Predicate<StudyItem> { $0.nextReviewAt <= Date() }, sort: \.nextReviewAt) private var dueItems: [StudyItem]
+    @Query(sort: \StudyItem.nextReviewAt) private var allItems: [StudyItem]
+
+    private var dueItems: [StudyItem] {
+        let now = Date()
+        return allItems.filter { $0.nextReviewAt <= now }
+    }
 
     var body: some View {
         NavigationStack {
