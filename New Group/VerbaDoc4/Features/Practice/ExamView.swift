@@ -3,7 +3,8 @@ import SwiftData
 
 struct ExamView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \.createdAt, order: .reverse) private var documents: [Document]
+    @EnvironmentObject private var xpManager: XPManager
+    @Query(sort: \Document.createdAt, order: .reverse) private var documents: [Document]
 
     @State private var selectedDocument: Document? = nil
     @State private var examItems: [StudyItem] = []
@@ -231,6 +232,7 @@ struct ExamView: View {
 
     private func markAnswer(correct: Bool) {
         if correct { correctCount += 1 }
+        xpManager.award(.reviewCard)
         showAnswer = false
         HapticManager.selection()
 

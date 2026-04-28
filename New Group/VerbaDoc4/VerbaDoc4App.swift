@@ -14,6 +14,7 @@ struct VerbaDoc4App: App {
     @State private var showSplash = true
     @StateObject private var appState = AppState()
     @StateObject private var streakManager = StreakManager()
+    @StateObject private var xpManager = XPManager()
     let modelContainer: ModelContainer
 
     init() {
@@ -45,6 +46,7 @@ struct VerbaDoc4App: App {
             .animation(.easeInOut(duration: 0.3), value: hasOnboarded)
             .environmentObject(appState)
             .environmentObject(streakManager)
+            .environmentObject(xpManager)
             .modelContainer(modelContainer)
         }
     }

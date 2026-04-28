@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct PracticeView: View {
-    @Query(sort: \.createdAt, order: .reverse) private var items: [StudyItem]
+    @Query(sort: \StudyItem.createdAt, order: .reverse) private var items: [StudyItem]
 
     var body: some View {
         NavigationStack {
