@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Combine
 
 struct RootTabView: View {
     enum Tab { case today, library, practice, settings }
