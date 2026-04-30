@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 enum StudyGenerator {
     private static let fallbackQuestionWordCount = 8
