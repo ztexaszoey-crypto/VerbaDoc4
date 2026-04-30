@@ -4,7 +4,7 @@ import SwiftData
 struct ExamView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var xpManager: XPManager
-    @Query(sort: \Document.createdAt, order: .reverse) private var documents: [Document]
+    @Query(sort: [SortDescriptor(\Document.createdAt, order: .reverse)]) private var documents: [Document]
 
     @State private var selectedDocument: Document? = nil
     @State private var examItems: [StudyItem] = []

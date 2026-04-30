@@ -4,8 +4,8 @@ import SwiftData
 struct ProfileView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var streakManager: StreakManager
-    @Query(sort: \Document.createdAt, order: .reverse) private var documents: [Document]
-    @Query(sort: \StudyItem.createdAt, order: .reverse) private var allItems: [StudyItem]
+    @Query(sort: [SortDescriptor(\Document.createdAt, order: .reverse)]) private var documents: [Document]
+    @Query(sort: [SortDescriptor(\StudyItem.createdAt, order: .reverse)]) private var allItems: [StudyItem]
 
     @Environment(\.dismiss) private var dismiss
 
