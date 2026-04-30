@@ -3,7 +3,7 @@ import SwiftData
 
 struct LibraryView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Document.createdAt, order: .reverse) private var documents: [Document]
+    @Query(sort: [SortDescriptor(\Document.createdAt, order: .reverse)]) private var documents: [Document]
 
     @State private var showAddMaterial = false
 
