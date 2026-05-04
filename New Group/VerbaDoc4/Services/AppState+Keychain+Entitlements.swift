@@ -3,8 +3,7 @@ import SwiftUI
 import Combine
 import Security
 
-@MainActor
-final class AppState: ObservableObject {
+final class AppState: NSObject, ObservableObject {
     static let hasOnboardedKey = "hasOnboarded"
     static let premiumRedeemCode = "VERBADOC4FREE"
 
@@ -14,9 +13,10 @@ final class AppState: ObservableObject {
     private let premiumService = "com.zoey.verbadoc4.premium"
     private let premiumAccount = "premium_status"
 
-    init() {
+    override init() {
         onboardingCompleted = UserDefaults.standard.bool(forKey: Self.hasOnboardedKey)
         hasPremium = (try? KeychainStore.loadString(service: premiumService, account: premiumAccount)) == "true" || EntitlementsChecker.hasPremiumEntitlement
+        super.init()
     }
 
     func completeOnboarding() {
@@ -35,6 +35,7 @@ final class AppState: ObservableObject {
         return true
     }
 
+    @MainActor
     func unlockPremium() {
         hasPremium = true
         try? KeychainStore.saveString("true", service: premiumService, account: premiumAccount)
