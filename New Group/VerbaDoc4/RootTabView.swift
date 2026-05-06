@@ -33,7 +33,7 @@ struct RootTabView: View {
                 .tabItem { Label("Settings", systemImage: "gear") }
                 .tag(Tab.settings)
         }
-        .tint(VerbaTheme.green)
+        .tint(VerbaTheme.primary)
         .onAppear {
             xpManager.awardDailyLoginIfNeeded()
             streakManager.markStudyCompleted()

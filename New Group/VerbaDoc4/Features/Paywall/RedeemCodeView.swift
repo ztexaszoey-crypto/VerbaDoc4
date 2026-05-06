@@ -20,7 +20,7 @@ struct RedeemCodeView: View {
                 if let msg = successMessage {
                     Section {
                         Label(msg, systemImage: "checkmark.circle.fill")
-                            .foregroundStyle(VerbaTheme.green)
+                            .foregroundStyle(VerbaTheme.success)
                     }
                 } else if let err = errorMessage {
                     Section {

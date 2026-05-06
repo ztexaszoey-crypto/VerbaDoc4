@@ -62,7 +62,7 @@ struct ProfileView: View {
                 HapticManager.impact()
             }
             .font(.subheadline.bold())
-            .foregroundStyle(VerbaTheme.green)
+            .foregroundStyle(VerbaTheme.primary)
         }
     }
 
@@ -89,7 +89,7 @@ struct ProfileView: View {
                     icon: "rectangle.stack.fill",
                     value: "\(allItems.count)",
                     label: "Cards",
-                    color: VerbaTheme.green
+                    color: VerbaTheme.primary
                 )
                 Divider()
                 statItem(
@@ -152,7 +152,7 @@ struct ProfileView: View {
                 HapticManager.impact()
             } label: {
                 Label("View Unlocks", systemImage: "lock.open.fill")
-                    .foregroundStyle(VerbaTheme.green)
+                    .foregroundStyle(VerbaTheme.primary)
             }
         }
     }
@@ -193,7 +193,7 @@ struct ProfileView: View {
                     Spacer()
                     if isSelected {
                         Image(systemName: "checkmark")
-                            .foregroundStyle(VerbaTheme.green)
+                            .foregroundStyle(VerbaTheme.primary)
                     }
                 }
             }

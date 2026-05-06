@@ -137,7 +137,7 @@ struct UnlocksView: View {
 
             if isUnlocked {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(VerbaTheme.green)
+                    .foregroundStyle(VerbaTheme.success)
                     .font(.system(size: 16))
             }
         }

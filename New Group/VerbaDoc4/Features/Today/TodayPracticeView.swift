@@ -55,8 +55,7 @@ struct TodayPracticeView: View {
                 Spacer()
                 Image(systemName: "checkmark.seal.fill")
                     .font(.system(size: 52))
-                    .foregroundStyle(VerbaTheme.green)
-                Text("Session complete")
+                    .foregroundStyle(VerbaTheme.success)
                     .font(.title2.bold())
                 Button("Done") { dismiss() }
                     .buttonStyle(VerbaButtonStyle())
