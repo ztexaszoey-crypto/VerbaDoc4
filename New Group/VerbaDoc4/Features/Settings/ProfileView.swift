@@ -4,6 +4,7 @@ import SwiftData
 struct ProfileView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var streakManager: StreakManager
+    @EnvironmentObject private var xpManager: XPManager
     @Query(sort: [SortDescriptor(\Document.createdAt, order: .reverse)]) private var documents: [Document]
     @Query(sort: [SortDescriptor(\StudyItem.createdAt, order: .reverse)]) private var allItems: [StudyItem]
 
@@ -11,26 +12,26 @@ struct ProfileView: View {
 
     @State private var profile = UserProfile()
     @State private var isEditingProfile = false
-    @State private var showPaywall = false
+    @State private var showUnlocks = false
     @State private var showDeleteConfirmation = false
 
     var body: some View {
         NavigationStack {
             List {
-                profileHeaderSection
+                identityCardSection
                 statsSection
                 studyGoalSection
-                premiumSection
+                unlocksSection
                 subjectsSection
                 dangerSection
             }
-            .navigationTitle("Profile")
+            .navigationTitle("Identity")
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $isEditingProfile) {
                 editProfileSheet
             }
-            .sheet(isPresented: $showPaywall) {
-                PaywallView()
+            .sheet(isPresented: $showUnlocks) {
+                UnlocksView()
             }
             .confirmationDialog(
                 "Delete All Data",
@@ -48,33 +49,20 @@ struct ProfileView: View {
         }
     }
 
-    // MARK: - Profile Header
+    // MARK: - Identity Card
 
-    private var profileHeaderSection: some View {
+    private var identityCardSection: some View {
         Section {
-            HStack(spacing: 16) {
-                Image(systemName: "face.smiling.fill")
-                    .font(.system(size: 54, weight: .semibold))
-                    .foregroundStyle(VerbaTheme.green)
+            IdentityCardView()
+                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+                .listRowBackground(Color.clear)
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(profile.name.isEmpty ? "Student" : profile.name)
-                        .font(.title2.bold())
-                    Text(profile.age > 0 ? "Age \(profile.age)" : "Tap Edit to set up your profile")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                Button("Edit") {
-                    isEditingProfile = true
-                    HapticManager.impact()
-                }
-                .font(.subheadline.bold())
-                .foregroundStyle(VerbaTheme.green)
+            Button("Edit Name") {
+                isEditingProfile = true
+                HapticManager.impact()
             }
-            .padding(.vertical, 8)
+            .font(.subheadline.bold())
+            .foregroundStyle(VerbaTheme.green)
         }
     }
 
@@ -91,16 +79,23 @@ struct ProfileView: View {
                 )
                 Divider()
                 statItem(
+                    icon: "bolt.fill",
+                    value: "\(xpManager.totalXP)",
+                    label: "Total XP",
+                    color: xpManager.currentRank.color
+                )
+                Divider()
+                statItem(
                     icon: "rectangle.stack.fill",
                     value: "\(allItems.count)",
-                    label: "Total Cards",
+                    label: "Cards",
                     color: VerbaTheme.green
                 )
                 Divider()
                 statItem(
                     icon: "books.vertical.fill",
                     value: "\(documents.count)",
-                    label: "Documents",
+                    label: "Docs",
                     color: .blue
                 )
             }
@@ -148,33 +143,16 @@ struct ProfileView: View {
         }
     }
 
-    // MARK: - Premium
+    // MARK: - Unlocks
 
-    private var premiumSection: some View {
-        Section("Membership") {
-            HStack {
-                Label(appState.hasPremium ? "Premium Member" : "Free Tier", systemImage: appState.hasPremium ? "crown.fill" : "person.fill")
-                    .foregroundStyle(appState.hasPremium ? VerbaTheme.xpGold : .primary)
-                Spacer()
-                if appState.hasPremium {
-                    Text("Active")
-                        .font(.caption.bold())
-                        .foregroundStyle(VerbaTheme.green)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(VerbaTheme.green.opacity(0.15))
-                        .clipShape(Capsule())
-                }
-            }
-
-            if !appState.hasPremium {
-                Button {
-                    showPaywall = true
-                    HapticManager.impact()
-                } label: {
-                    Label("Upgrade to Premium", systemImage: "sparkles")
-                        .foregroundStyle(VerbaTheme.green)
-                }
+    private var unlocksSection: some View {
+        Section("Unlocks") {
+            Button {
+                showUnlocks = true
+                HapticManager.impact()
+            } label: {
+                Label("View Unlocks", systemImage: "lock.open.fill")
+                    .foregroundStyle(VerbaTheme.green)
             }
         }
     }
@@ -308,6 +286,7 @@ struct ProfileView: View {
     private func resetProfile() {
         profile = UserProfile()
         streakManager.reset()
+        xpManager.reset()
         saveProfile()
         HapticManager.success()
     }

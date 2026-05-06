@@ -1,21 +1,38 @@
 import Foundation
 import SwiftUI
 import Combine
-import Security
+
+// MARK: - RedeemResult
+
+enum RedeemResult {
+    case success(String)
+    case alreadyUnlocked
+    case invalid
+}
+
+// MARK: - AppState
 
 final class AppState: NSObject, ObservableObject {
     static let hasOnboardedKey = "hasOnboarded"
-    static let premiumRedeemCode = "VERBADOC4FREE"
 
-    @Published var hasPremium: Bool = false
     @Published var onboardingCompleted: Bool
+    @Published private(set) var unlockedEventItems: Set<String>
 
-    private let premiumService = "com.zoey.verbadoc4.premium"
-    private let premiumAccount = "premium_status"
+    /// Max 5 active event codes. Keys are normalized code strings, values are reward names.
+    private static let eventCodes: [String: String] = [
+        "FOUNDERS":  "Founders Badge",
+        "EXAMWEEK":  "Exam Week Focus",
+        "LAUNCH":    "Launch Edition",
+        "BETA":      "Beta Tester",
+        "WELCOME":   "Welcome Gift"
+    ]
+
+    private let unlocksKey = "unlocks.eventItems"
 
     override init() {
         onboardingCompleted = UserDefaults.standard.bool(forKey: Self.hasOnboardedKey)
-        hasPremium = (try? KeychainStore.loadString(service: premiumService, account: premiumAccount)) == "true" || EntitlementsChecker.hasPremiumEntitlement
+        let stored = UserDefaults.standard.stringArray(forKey: "unlocks.eventItems") ?? []
+        unlockedEventItems = Set(stored)
         super.init()
     }
 
@@ -25,69 +42,14 @@ final class AppState: NSObject, ObservableObject {
     }
 
     @discardableResult
-    func redeem(code: String) -> Bool {
+    func redeem(code: String) -> RedeemResult {
         let normalized = code
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .uppercased()
-
-        guard normalized == Self.premiumRedeemCode else { return false }
-        unlockPremium()
-        return true
-    }
-
-    @MainActor
-    func unlockPremium() {
-        hasPremium = true
-        try? KeychainStore.saveString("true", service: premiumService, account: premiumAccount)
-    }
-}
-
-enum KeychainStore {
-    static func saveString(_ value: String, service: String, account: String) throws {
-        let encoded = Data(value.utf8)
-        let query: [CFString: Any] = [
-            kSecClass: kSecClassGenericPassword,
-            kSecAttrService: service,
-            kSecAttrAccount: account,
-            kSecValueData: encoded
-        ]
-
-        SecItemDelete(query as CFDictionary)
-        let status = SecItemAdd(query as CFDictionary, nil)
-        guard status == errSecSuccess else {
-            throw NSError(domain: NSOSStatusErrorDomain, code: Int(status))
-        }
-    }
-
-    static func loadString(service: String, account: String) throws -> String? {
-        let query: [CFString: Any] = [
-            kSecClass: kSecClassGenericPassword,
-            kSecAttrService: service,
-            kSecAttrAccount: account,
-            kSecReturnData: true,
-            kSecMatchLimit: kSecMatchLimitOne
-        ]
-
-        var item: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &item)
-
-        if status == errSecItemNotFound {
-            return nil
-        }
-
-        guard status == errSecSuccess,
-              let data = item as? Data,
-              let value = String(data: data, encoding: .utf8)
-        else {
-            throw NSError(domain: NSOSStatusErrorDomain, code: Int(status))
-        }
-
-        return value
-    }
-}
-
-enum EntitlementsChecker {
-    static var hasPremiumEntitlement: Bool {
-        (Bundle.main.object(forInfoDictionaryKey: "VerbaDocPremiumEnabled") as? Bool) ?? false
+        guard let reward = Self.eventCodes[normalized] else { return .invalid }
+        guard !unlockedEventItems.contains(reward) else { return .alreadyUnlocked }
+        unlockedEventItems.insert(reward)
+        UserDefaults.standard.set(Array(unlockedEventItems), forKey: unlocksKey)
+        return .success(reward)
     }
 }

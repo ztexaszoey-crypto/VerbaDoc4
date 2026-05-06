@@ -5,7 +5,8 @@ struct RedeemCodeView: View {
     @EnvironmentObject private var appState: AppState
 
     @State private var code = ""
-    @State private var showError = false
+    @State private var errorMessage: String? = nil
+    @State private var successMessage: String? = nil
 
     var body: some View {
         NavigationStack {
@@ -16,27 +17,48 @@ struct RedeemCodeView: View {
                         .autocorrectionDisabled()
                 }
 
-                if showError {
-                    Text("Invalid code")
-                        .foregroundStyle(.red)
+                if let msg = successMessage {
+                    Section {
+                        Label(msg, systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(VerbaTheme.green)
+                    }
+                } else if let err = errorMessage {
+                    Section {
+                        Text(err)
+                            .foregroundStyle(.red)
+                    }
                 }
             }
-            .navigationTitle("Redeem")
+            .navigationTitle("Redeem Code")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Apply") {
-                        if appState.redeem(code: code) {
-                            dismiss()
-                        } else {
-                            showError = true
-                        }
-                    }
-                    .disabled(code.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    Button("Apply") { applyCode() }
+                        .disabled(code.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .fontWeight(.bold)
                 }
             }
         }
     }
+
+    private func applyCode() {
+        errorMessage = nil
+        successMessage = nil
+        switch appState.redeem(code: code) {
+        case .success(let reward):
+            successMessage = "Unlocked: \(reward)"
+            HapticManager.success()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { dismiss() }
+        case .alreadyUnlocked:
+            errorMessage = "Already unlocked."
+            HapticManager.impact()
+        case .invalid:
+            errorMessage = "Invalid code."
+            HapticManager.impact()
+        }
+    }
 }
+
