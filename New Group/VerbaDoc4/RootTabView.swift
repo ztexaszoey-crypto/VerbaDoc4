@@ -6,6 +6,8 @@ struct RootTabView: View {
     enum Tab { case today, library, practice, settings }
     @State private var selected: Tab = .today
     @Query private var allStudyItems: [StudyItem]
+    @EnvironmentObject private var xpManager: XPManager
+    @EnvironmentObject private var streakManager: StreakManager
 
     private var dueItems: [StudyItem] {
         let now = Date()
@@ -32,5 +34,9 @@ struct RootTabView: View {
                 .tag(Tab.settings)
         }
         .tint(VerbaTheme.green)
+        .onAppear {
+            xpManager.awardDailyLoginIfNeeded()
+            streakManager.markStudyCompleted()
+        }
     }
 }
