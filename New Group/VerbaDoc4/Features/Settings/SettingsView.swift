@@ -2,20 +2,23 @@ import SwiftUI
 
 struct SettingsView: View {
     @AppStorage(AppState.hasOnboardedKey) private var hasOnboarded = false
+    @AppStorage("notifications.hour") private var reminderHour = 9
+
     @EnvironmentObject private var streakManager: StreakManager
     @EnvironmentObject private var xpManager: XPManager
+    @State private var groqAPIKey = ""
 
     var body: some View {
         NavigationStack {
             Form {
-                Section("Identity") {
+                Section("Profile") {
                     NavigationLink {
                         ProfileView()
                     } label: {
                         HStack {
-                            Label("Identity", systemImage: "person.fill")
+                            Label("Identity & avatar", systemImage: "person.fill")
                             Spacer()
-                            Text("Rank \(xpManager.currentRank.rawValue + 1)")
+                            Text(xpManager.currentRank.name)
                                 .font(.subheadline)
                                 .foregroundStyle(xpManager.currentRank.color)
                         }
@@ -35,18 +38,53 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                     }
 
-                    Button("Mark Today as Studied") {
-                        streakManager.markStudyCompleted()
+                    Stepper("Daily reminder: \(displayHour(reminderHour))", value: $reminderHour, in: 6...22)
+                        .onChange(of: reminderHour) { _, newValue in
+                            NotificationManager.shared.scheduleDailyReminder(hour: newValue)
+                        }
+
+                    SecureField("Groq API key", text: $groqAPIKey)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                }
+
+                Section("Community") {
+                    NavigationLink("Follow students & DM") {
+                        CommunityView()
+                    }
+                }
+
+                Section("Legal") {
+                    NavigationLink("Terms of Service") {
+                        TermsOfServiceView()
+                    }
+                    NavigationLink("Privacy Policy") {
+                        PrivacyPolicyView()
                     }
                 }
 
                 Section("App") {
-                    Button("Show Onboarding Again") {
+                    Button("Show onboarding again") {
                         hasOnboarded = false
                     }
                 }
             }
             .navigationTitle("Settings")
+            .onAppear {
+                groqAPIKey = SecureStore.string(forKey: SecureStore.groqAPIKeyKey) ?? ""
+            }
+            .onChange(of: groqAPIKey) { _, newValue in
+                SecureStore.set(newValue, forKey: SecureStore.groqAPIKeyKey)
+            }
+        }
+    }
+
+    private func displayHour(_ hour: Int) -> String {
+        switch hour {
+        case 0: return "12 AM"
+        case 1..<12: return "\(hour) AM"
+        case 12: return "12 PM"
+        default: return "\(hour - 12) PM"
         }
     }
 }

@@ -6,6 +6,8 @@ struct IdentityCardView: View {
     @EnvironmentObject private var streakManager: StreakManager
     @Query private var documents: [Document]
     @AppStorage("profile.name") private var profileName: String = ""
+    @AppStorage("profile.grade") private var profileGrade: String = ""
+    @AppStorage("profile.avatar") private var profileAvatar: String = "books.vertical.fill"
 
     @State private var glowAmount: Double = 0.5
     @State private var showRankUp = false
@@ -55,12 +57,12 @@ struct IdentityCardView: View {
                 Text(profileName.isEmpty ? "SCHOLAR" : profileName.uppercased())
                     .font(.system(size: 22, weight: .bold, design: .monospaced))
                     .foregroundStyle(.white)
-                Text("RANK \(rank.rawValue + 1): \(rank.name.uppercased())")
+                Text("\(profileGrade.isEmpty ? "VERBADOC" : profileGrade.uppercased()) • \(rank.name.uppercased())")
                     .font(.system(size: 12, weight: .medium, design: .monospaced))
                     .foregroundStyle(rank.color)
             }
             Spacer()
-            Image(systemName: rankIcon)
+            Image(systemName: profileAvatar)
                 .font(.system(size: 26, weight: .medium))
                 .foregroundStyle(rank.color)
         }
@@ -144,16 +146,6 @@ struct IdentityCardView: View {
     }
 
     // MARK: - Helpers
-
-    private var rankIcon: String {
-        switch rank {
-        case .initiate:  return "circle.dotted"
-        case .scholar:   return "book.fill"
-        case .analyst:   return "chart.bar.fill"
-        case .architect: return "building.2.fill"
-        case .master:    return "crown.fill"
-        }
-    }
 
     private func startGlow() {
         withAnimation(.easeInOut(duration: 1.8).repeatForever(autoreverses: true)) {

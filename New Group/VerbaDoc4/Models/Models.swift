@@ -27,16 +27,53 @@ struct Subject: Identifiable, Hashable {
 
 struct UserProfile {
     var name: String
+    var grade: String
     var age: Int
+    var email: String
+    var avatarSymbol: String
     var studyGoal: Int
     var preferredSubjects: [Subject]
 
-    init(name: String = "", age: Int = 0, studyGoal: Int = 20, preferredSubjects: [Subject] = []) {
+    init(
+        name: String = "",
+        grade: String = "",
+        age: Int = 0,
+        email: String = "",
+        avatarSymbol: String = "books.vertical.fill",
+        studyGoal: Int = 20,
+        preferredSubjects: [Subject] = []
+    ) {
         self.name = name
+        self.grade = grade
         self.age = age
+        self.email = email
+        self.avatarSymbol = avatarSymbol
         self.studyGoal = studyGoal
         self.preferredSubjects = preferredSubjects
     }
+}
+
+struct AvatarOption: Identifiable, Hashable {
+    let symbol: String
+    let name: String
+    let category: String
+
+    var id: String { "\(category)-\(symbol)" }
+
+    static let all: [AvatarOption] = [
+        AvatarOption(symbol: "books.vertical.fill", name: "Bookworm", category: "Study"),
+        AvatarOption(symbol: "graduationcap.fill", name: "Scholar", category: "Study"),
+        AvatarOption(symbol: "brain.head.profile", name: "Thinker", category: "Study"),
+        AvatarOption(symbol: "lightbulb.fill", name: "Idea", category: "Study"),
+        AvatarOption(symbol: "leaf.fill", name: "Leaf", category: "Nature"),
+        AvatarOption(symbol: "sun.max.fill", name: "Sunny", category: "Nature"),
+        AvatarOption(symbol: "moon.stars.fill", name: "Moon", category: "Nature"),
+        AvatarOption(symbol: "ant.fill", name: "Busy Bee", category: "Animals"),
+        AvatarOption(symbol: "tortoise.fill", name: "Steady", category: "Animals"),
+        AvatarOption(symbol: "hare.fill", name: "Quick", category: "Animals"),
+        AvatarOption(symbol: "theatermasks.fill", name: "Creative", category: "Creative"),
+        AvatarOption(symbol: "paintpalette.fill", name: "Palette", category: "Creative")
+    ]
 }
 
 // MARK: - StudySession
@@ -75,4 +112,44 @@ struct TutorMessage: Identifiable {
         self.content = content
         self.timestamp = Date()
     }
+}
+
+struct CommunityStudent: Identifiable, Hashable {
+    let id: String
+    let name: String
+    let grade: String
+    let avatarSymbol: String
+    let bio: String
+    let isOnline: Bool
+
+    static let featured: [CommunityStudent] = [
+        CommunityStudent(id: "maya", name: "Maya", grade: "Grade 10", avatarSymbol: "moon.stars.fill", bio: "Biology + history notes queen.", isOnline: true),
+        CommunityStudent(id: "leo", name: "Leo", grade: "Grade 11", avatarSymbol: "brain.head.profile", bio: "Math proofs and exam hacks.", isOnline: true),
+        CommunityStudent(id: "sana", name: "Sana", grade: "Grade 9", avatarSymbol: "paintpalette.fill", bio: "Makes flashcards for everything.", isOnline: false)
+    ]
+}
+
+struct CommunityChatMessage: Identifiable, Codable, Hashable {
+    let id: UUID
+    let sender: String
+    let body: String
+    let timestamp: Date
+    let isCurrentUser: Bool
+
+    init(id: UUID = UUID(), sender: String, body: String, timestamp: Date = Date(), isCurrentUser: Bool) {
+        self.id = id
+        self.sender = sender
+        self.body = body
+        self.timestamp = timestamp
+        self.isCurrentUser = isCurrentUser
+    }
+}
+
+struct StudyChallenge: Identifiable {
+    let id: String
+    let title: String
+    let detail: String
+    let xpReward: Int
+    let isCompleted: Bool
+    let isClaimed: Bool
 }
