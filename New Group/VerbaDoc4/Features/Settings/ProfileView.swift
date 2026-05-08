@@ -12,6 +12,8 @@ struct ProfileView: View {
     @State private var showUnlocks = false
     @State private var showDeleteConfirmation = false
 
+    private let minimumAge = 10
+
     var body: some View {
         NavigationStack {
             List {
@@ -185,10 +187,10 @@ struct ProfileView: View {
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .keyboardType(.emailAddress)
-                    Stepper("Age: \(max(profile.age, 10))", value: Binding(
-                        get: { max(profile.age, 10) },
+                    Stepper("Age: \(max(profile.age, minimumAge))", value: Binding(
+                        get: { max(profile.age, minimumAge) },
                         set: { profile.age = $0 }
-                    ), in: 10...100)
+                    ), in: minimumAge...100)
                 }
 
                 Section("Avatar") {

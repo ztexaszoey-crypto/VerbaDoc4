@@ -182,7 +182,7 @@ struct OnboardingView: View {
     private func isValidEmail(_ email: String) -> Bool {
         let trimmed = email.trimmingCharacters(in: .whitespacesAndNewlines)
         // Basic client-side validation to catch obvious mistakes during onboarding.
-        // This intentionally accepts common email formats without trying to enforce every RFC edge case.
+        // This intentionally accepts common email formats without trying to enforce full RFC-complete email parsing.
         let pattern = #"^[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}$"#
         return trimmed.range(of: pattern, options: [.regularExpression, .caseInsensitive]) != nil
     }

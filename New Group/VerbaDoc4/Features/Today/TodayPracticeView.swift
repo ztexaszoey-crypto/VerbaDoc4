@@ -59,8 +59,10 @@ struct TodayPracticeView: View {
     private var swipeHint: some View {
         HStack {
             Label("Swipe left for Again", systemImage: "arrow.left")
+                .accessibilityLabel("Swipe left to rate again")
             Spacer()
             Label("Swipe right for Easy", systemImage: "arrow.right")
+                .accessibilityLabel("Swipe right to rate easy")
         }
         .font(.caption)
         .foregroundStyle(.secondary)

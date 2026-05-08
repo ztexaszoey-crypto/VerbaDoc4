@@ -6,7 +6,7 @@ final class CommunityStore: ObservableObject {
     @Published private(set) var followedIDs: Set<String> = []
     @Published private(set) var threads: [String: [CommunityChatMessage]] = [:]
 
-    private let replyDelay: TimeInterval = 0.6
+    private let autoReplyDelay: TimeInterval = 0.6
     private let defaults: UserDefaults
     private let followedKey = "community.followed"
     private let threadsKey = "community.threads"
@@ -49,7 +49,7 @@ final class CommunityStore: ObservableObject {
         persist()
 
         let response = autoReply(to: cleaned, from: student)
-        DispatchQueue.main.asyncAfter(deadline: .now() + replyDelay) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + autoReplyDelay) {
             var updated = self.threads[student.id] ?? thread
             updated.append(CommunityChatMessage(sender: student.name, body: response, isCurrentUser: false))
             self.threads[student.id] = updated

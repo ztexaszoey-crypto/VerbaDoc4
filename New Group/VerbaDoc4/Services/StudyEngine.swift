@@ -190,7 +190,7 @@ enum StudyEngine {
         item.lastRating = rating.rawValue
         // SuperMemo-2 ease update formula:
         // EF' = EF + (0.1 - (5-q) * (0.08 + (5-q) * 0.02))
-        // where q is the 0...5 review quality score mapped from the selected rating above.
+        // where q is the review quality mapped here as again=1, hard=3, good=4, easy=5.
         let sm2Adjustment = 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)
         item.ease = max(1.3, min(3.0, item.ease + sm2Adjustment))
     }

@@ -286,7 +286,7 @@ struct TutorView: View {
                 throw DocumentImportError.unreadableImage
             }
             let extracted = try await DocumentImportService.extractText(from: data)
-            let preview = sanitizedOCRPreview(extracted)
+            let preview = truncatedOCRPreview(extracted)
             messages.append(TutorMessage(role: .student, content: "Can you help with this homework photo?"))
             messages.append(TutorMessage(role: .tutor, content: "I extracted this text:\n\n\(preview)\n\nHere’s the connection: compare it to \(itemAnswerSummary)."))
         } catch {
@@ -299,7 +299,7 @@ struct TutorView: View {
         "\(item.answer) — \(item.explanation)"
     }
 
-    private func sanitizedOCRPreview(_ text: String) -> String {
+    private func truncatedOCRPreview(_ text: String) -> String {
         let cleaned = text
             .replacingOccurrences(of: "\r\n", with: "\n")
             .replacingOccurrences(of: "\r", with: "\n")

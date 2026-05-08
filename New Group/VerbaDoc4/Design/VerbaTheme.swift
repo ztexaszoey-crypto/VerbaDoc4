@@ -32,7 +32,10 @@ enum VerbaTheme {
     }
 
     static func serifFallback(_ size: CGFloat, italic: Bool = false) -> Font {
-        italic ? .system(size: size, design: .serif).italic() : .system(size: size, design: .serif)
+        if italic {
+            return .system(size: size, design: .serif).italic()
+        }
+        return .system(size: size, design: .serif)
     }
 
     static func sansFallback(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
