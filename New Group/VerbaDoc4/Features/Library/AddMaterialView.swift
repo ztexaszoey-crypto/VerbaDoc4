@@ -16,6 +16,8 @@ struct AddMaterialView: View {
     @State private var statusMessage = ""
     @State private var errorMessage: String?
 
+    private let genericFilenames = ["scan", "scan 001", "document", "untitled"]
+
     var body: some View {
         NavigationStack {
             Form {
@@ -162,7 +164,7 @@ struct AddMaterialView: View {
             .replacingOccurrences(of: "-", with: " ")
             .trimmingCharacters(in: .whitespacesAndNewlines)
         let lowercased = base.lowercased()
-        if ["scan", "scan 001", "document", "untitled"].contains(lowercased) || base.isEmpty {
+        if genericFilenames.contains(lowercased) || base.isEmpty {
             return "Imported PDF"
         }
         return base.capitalized

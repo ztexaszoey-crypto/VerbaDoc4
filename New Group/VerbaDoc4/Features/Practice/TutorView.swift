@@ -15,6 +15,7 @@ struct TutorView: View {
     @State private var isProcessingPhoto = false
 
     private let maxHints = 3
+    private let maxOCRPreviewLength = 600
 
     var body: some View {
         NavigationStack {
@@ -303,6 +304,6 @@ struct TutorView: View {
             .replacingOccurrences(of: "\r\n", with: "\n")
             .replacingOccurrences(of: "\r", with: "\n")
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        return String(cleaned.prefix(600))
+        return String(cleaned.prefix(maxOCRPreviewLength))
     }
 }

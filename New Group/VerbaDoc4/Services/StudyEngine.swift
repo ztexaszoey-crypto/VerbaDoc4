@@ -167,25 +167,21 @@ enum StudyEngine {
             quality = 1
             item.reps = 0
             item.intervalDays = 0
-            item.ease = max(1.3, item.ease - 0.2)
             item.nextReviewAt = now.addingTimeInterval(10 * 60)
         case .hard:
             quality = 3
             item.reps += 1
-            item.ease = max(1.3, item.ease - 0.15)
             item.intervalDays = max(1, Int((Double(max(item.intervalDays, 1)) * 1.2).rounded()))
             item.nextReviewAt = calendar.date(byAdding: .day, value: item.intervalDays, to: now) ?? now
         case .good:
             quality = 4
             item.reps += 1
-            item.ease = max(1.3, item.ease + 0.02)
             let nextInterval = item.intervalDays <= 0 ? 1 : max(2, Int((Double(item.intervalDays) * item.ease).rounded()))
             item.intervalDays = nextInterval
             item.nextReviewAt = calendar.date(byAdding: .day, value: nextInterval, to: now) ?? now
         case .easy:
             quality = 5
             item.reps += 1
-            item.ease = min(3.0, item.ease + 0.12)
             let nextInterval = item.intervalDays <= 1 ? 4 : max(4, Int((Double(item.intervalDays) * (item.ease + 0.35)).rounded()))
             item.intervalDays = nextInterval
             item.nextReviewAt = calendar.date(byAdding: .day, value: nextInterval, to: now) ?? now
