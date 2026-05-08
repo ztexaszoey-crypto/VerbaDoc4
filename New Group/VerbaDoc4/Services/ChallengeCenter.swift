@@ -32,7 +32,7 @@ enum ChallengeCenter {
             StudyChallenge(
                 id: "weak-spotter",
                 title: "Weak Spotter",
-                detail: "Find and review a weak card under 60% mastery.",
+                detail: "Identify at least one weak card under 60% mastery.",
                 xpReward: 30,
                 isCompleted: weakCards > 0,
                 isClaimed: claimed.contains("weak-spotter")

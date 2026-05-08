@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TodayPracticeView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @EnvironmentObject private var xpManager: XPManager
     @EnvironmentObject private var streakManager: StreakManager
 
@@ -94,7 +95,8 @@ struct TodayPracticeView: View {
                 .fill(VerbaTheme.card)
                 .shadow(color: VerbaTheme.ink.opacity(0.08), radius: 18, y: 10)
         )
-        .rotation3DEffect(.degrees(showAnswer ? 180 : 0), axis: (x: 0, y: 1, z: 0))
+        .rotation3DEffect(.degrees(reduceMotion ? 0 : (showAnswer ? 180 : 0)), axis: (x: 0, y: 1, z: 0))
+        .opacity(reduceMotion && showAnswer ? 0.96 : 1.0)
         .offset(dragOffset)
         .rotationEffect(.degrees(Double(dragOffset.width / 18)))
         .gesture(

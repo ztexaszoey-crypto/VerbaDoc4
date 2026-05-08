@@ -14,6 +14,11 @@ struct OnboardingView: View {
 
     private var step: VerbaCharacter { VerbaCharacter.onboardingSteps[stepIndex] }
     private let grades = ["Grade 6", "Grade 7", "Grade 8", "Grade 9", "Grade 10", "Grade 11", "Grade 12", "College"]
+    private var canContinue: Bool {
+        !profileName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && !profileGrade.isEmpty
+            && isValidEmail(profileEmail)
+    }
 
     var body: some View {
         ZStack {
@@ -128,7 +133,7 @@ struct OnboardingView: View {
                 advance()
             }
             .buttonStyle(VerbaButtonStyle())
-            .disabled(profileName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || profileGrade.isEmpty || profileEmail.isEmpty)
+            .disabled(!canContinue)
 
             if stepIndex > 0 {
                 Button("Back") {
@@ -172,5 +177,11 @@ struct OnboardingView: View {
         case 12: return "12 PM"
         default: return "\(hour - 12) PM"
         }
+    }
+
+    private func isValidEmail(_ email: String) -> Bool {
+        let trimmed = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        let pattern = #"^[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}$"#
+        return trimmed.range(of: pattern, options: [.regularExpression, .caseInsensitive]) != nil
     }
 }

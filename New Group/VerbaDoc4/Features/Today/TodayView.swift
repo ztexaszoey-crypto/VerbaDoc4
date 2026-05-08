@@ -191,8 +191,7 @@ struct TodayView: View {
                             .foregroundStyle(.secondary)
                     } else if challenge.isCompleted {
                         Button("Claim +\(challenge.xpReward) XP") {
-                            ChallengeCenter.claim(challenge)
-                            xpManager.award(points: challenge.xpReward)
+                            claim(challenge)
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(VerbaTheme.green)
@@ -205,5 +204,11 @@ struct TodayView: View {
             }
         }
         .verbaCard()
+    }
+
+    private func claim(_ challenge: StudyChallenge) {
+        guard !challenge.isClaimed else { return }
+        xpManager.award(points: challenge.xpReward)
+        ChallengeCenter.claim(challenge)
     }
 }

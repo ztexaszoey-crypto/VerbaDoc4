@@ -7,8 +7,6 @@ struct AddMaterialView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
 
-    @AppStorage("groq.apiKey") private var groqAPIKey = ""
-
     @State private var title = ""
     @State private var extractedText = ""
     @State private var sourceType: SourceType = .text
@@ -105,7 +103,7 @@ struct AddMaterialView: View {
             extractedText = try DocumentImportService.extractText(fromPDFAt: url)
             statusMessage = "Imported \(url.lastPathComponent)"
             if title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                title = url.deletingPathExtension().lastPathComponent
+                title = suggestedTitle(from: url)
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -145,7 +143,7 @@ struct AddMaterialView: View {
         let cards = await FlashcardGenerationService.generateCards(
             from: extractedText,
             documentTitle: document.title,
-            groqAPIKey: groqAPIKey
+            groqAPIKey: SecureStore.string(forKey: SecureStore.groqAPIKeyKey) ?? ""
         )
 
         for card in cards {
@@ -156,5 +154,17 @@ struct AddMaterialView: View {
         try? modelContext.save()
         isBusy = false
         dismiss()
+    }
+
+    private func suggestedTitle(from url: URL) -> String {
+        let base = url.deletingPathExtension().lastPathComponent
+            .replacingOccurrences(of: "_", with: " ")
+            .replacingOccurrences(of: "-", with: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let lowercased = base.lowercased()
+        if ["scan", "scan 001", "document", "untitled"].contains(lowercased) || base.isEmpty {
+            return "Imported PDF"
+        }
+        return base.capitalized
     }
 }

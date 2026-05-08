@@ -241,7 +241,7 @@ struct ProfileView: View {
         profile.studyGoal = defaults.integer(forKey: "profile.studyGoal")
         if profile.studyGoal == 0 { profile.studyGoal = 20 }
 
-        let savedSubjects = defaults.stringArray(forKey: "profile.subjects") ?? []
+        let savedSubjects = Set(defaults.stringArray(forKey: "profile.subjects") ?? [])
         profile.preferredSubjects = Subject.all.filter { savedSubjects.contains($0.name) }
     }
 

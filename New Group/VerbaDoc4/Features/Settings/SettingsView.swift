@@ -3,10 +3,10 @@ import SwiftUI
 struct SettingsView: View {
     @AppStorage(AppState.hasOnboardedKey) private var hasOnboarded = false
     @AppStorage("notifications.hour") private var reminderHour = 9
-    @AppStorage("groq.apiKey") private var groqAPIKey = ""
 
     @EnvironmentObject private var streakManager: StreakManager
     @EnvironmentObject private var xpManager: XPManager
+    @State private var groqAPIKey = ""
 
     var body: some View {
         NavigationStack {
@@ -70,6 +70,12 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .onAppear {
+                groqAPIKey = SecureStore.string(forKey: SecureStore.groqAPIKeyKey) ?? ""
+            }
+            .onChange(of: groqAPIKey) { _, newValue in
+                SecureStore.set(newValue, forKey: SecureStore.groqAPIKeyKey)
+            }
         }
     }
 

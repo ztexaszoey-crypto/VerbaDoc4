@@ -64,7 +64,7 @@ enum StudyEngine {
         default: ratingScore = item.reps == 0 ? 6 : 10
         }
 
-        let overdueDays = max(0, calendar.dateComponents([.day], from: item.nextReviewAt, to: now).day ?? 0)
+        let overdueDays = max(0, dayDistance(from: item.nextReviewAt, to: now, calendar: calendar))
         let decay = min(Double(overdueDays) * 6, 40)
         return Int(max(0, min(100, repScore + easeScore + ratingScore - decay)).rounded())
     }
@@ -192,7 +192,18 @@ enum StudyEngine {
         }
 
         item.lastRating = rating.rawValue
+        // SuperMemo-2 ease update formula:
+        // EF' = EF + (0.1 - (5-q) * (0.08 + (5-q) * 0.02))
+        // where q is the 0...5 review quality score mapped from the selected rating above.
         let sm2Adjustment = 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)
         item.ease = max(1.3, min(3.0, item.ease + sm2Adjustment))
+    }
+
+    private static func dayDistance(from start: Date, to end: Date, calendar: Calendar) -> Int {
+        let components = calendar.dateComponents([.day], from: start, to: end)
+        if let day = components.day {
+            return day
+        }
+        return 0
     }
 }

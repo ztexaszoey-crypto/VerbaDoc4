@@ -3,7 +3,6 @@ import SwiftUI
 
 struct DocumentDetailView: View {
     @Environment(\.modelContext) private var modelContext
-    @AppStorage("groq.apiKey") private var groqAPIKey = ""
 
     @Bindable var document: Document
 
@@ -109,7 +108,7 @@ struct DocumentDetailView: View {
         let generated = await FlashcardGenerationService.generateCards(
             from: document.extractedText,
             documentTitle: document.title,
-            groqAPIKey: groqAPIKey
+            groqAPIKey: SecureStore.string(forKey: SecureStore.groqAPIKeyKey) ?? ""
         )
         guard !generated.isEmpty else {
             isGenerating = false
