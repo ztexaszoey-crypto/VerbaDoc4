@@ -19,7 +19,11 @@ final class XPManager: ObservableObject {
     }
 
     func award(_ action: XPAction) {
-        totalXP += XPSystem.xpForAction(action)
+        award(points: XPSystem.xpForAction(action))
+    }
+
+    func award(points: Int) {
+        totalXP += points
         defaults.set(totalXP, forKey: xpKey)
     }
 

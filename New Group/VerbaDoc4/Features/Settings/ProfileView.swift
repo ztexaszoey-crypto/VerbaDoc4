@@ -1,14 +1,11 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct ProfileView: View {
-    @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var streakManager: StreakManager
     @EnvironmentObject private var xpManager: XPManager
     @Query(sort: [SortDescriptor(\Document.createdAt, order: .reverse)]) private var documents: [Document]
     @Query(sort: [SortDescriptor(\StudyItem.createdAt, order: .reverse)]) private var allItems: [StudyItem]
-
-    @Environment(\.dismiss) private var dismiss
 
     @State private var profile = UserProfile()
     @State private var isEditingProfile = false
@@ -25,7 +22,7 @@ struct ProfileView: View {
                 subjectsSection
                 dangerSection
             }
-            .navigationTitle("Identity")
+            .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $isEditingProfile) {
                 editProfileSheet
@@ -33,23 +30,17 @@ struct ProfileView: View {
             .sheet(isPresented: $showUnlocks) {
                 UnlocksView()
             }
-            .confirmationDialog(
-                "Delete All Data",
-                isPresented: $showDeleteConfirmation,
-                titleVisibility: .visible
-            ) {
+            .confirmationDialog("Delete All Data", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
                 Button("Delete Everything", role: .destructive) {
                     resetProfile()
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("This will clear your profile data and reset your streak. This cannot be undone.")
+                Text("This clears your profile details, study streak, and XP.")
             }
             .onAppear { loadProfile() }
         }
     }
-
-    // MARK: - Identity Card
 
     private var identityCardSection: some View {
         Section {
@@ -57,7 +48,13 @@ struct ProfileView: View {
                 .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
                 .listRowBackground(Color.clear)
 
-            Button("Edit Name") {
+            HStack {
+                profilePill(icon: profile.avatarSymbol, text: profile.name.isEmpty ? "Your name" : profile.name)
+                profilePill(icon: "graduationcap.fill", text: profile.grade.isEmpty ? "Grade" : profile.grade)
+                profilePill(icon: "envelope.fill", text: profile.email.isEmpty ? "Email" : profile.email)
+            }
+
+            Button("Edit profile") {
                 isEditingProfile = true
                 HapticManager.impact()
             }
@@ -66,38 +63,25 @@ struct ProfileView: View {
         }
     }
 
-    // MARK: - Stats
+    private func profilePill(icon: String, text: String) -> some View {
+        Label(text, systemImage: icon)
+            .font(.caption)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(VerbaTheme.cream)
+            .clipShape(Capsule())
+    }
 
     private var statsSection: some View {
         Section("Stats") {
             HStack {
-                statItem(
-                    icon: "flame.fill",
-                    value: "\(streakManager.currentStreak)",
-                    label: "Day Streak",
-                    color: .orange
-                )
+                statItem(icon: "flame.fill", value: "\(streakManager.currentStreak)", label: "Streak", color: .orange)
                 Divider()
-                statItem(
-                    icon: "bolt.fill",
-                    value: "\(xpManager.totalXP)",
-                    label: "Total XP",
-                    color: xpManager.currentRank.color
-                )
+                statItem(icon: "bolt.fill", value: "\(xpManager.totalXP)", label: "XP", color: xpManager.currentRank.color)
                 Divider()
-                statItem(
-                    icon: "rectangle.stack.fill",
-                    value: "\(allItems.count)",
-                    label: "Cards",
-                    color: VerbaTheme.green
-                )
+                statItem(icon: "rectangle.stack.fill", value: "\(allItems.count)", label: "Cards", color: VerbaTheme.green)
                 Divider()
-                statItem(
-                    icon: "books.vertical.fill",
-                    value: "\(documents.count)",
-                    label: "Docs",
-                    color: .blue
-                )
+                statItem(icon: "books.vertical.fill", value: "\(documents.count)", label: "Docs", color: .blue)
             }
             .frame(height: 80)
         }
@@ -117,52 +101,32 @@ struct ProfileView: View {
         .frame(maxWidth: .infinity)
     }
 
-    // MARK: - Study Goal
-
     private var studyGoalSection: some View {
-        Section("Daily Study Goal") {
-            HStack {
-                Label("Cards per day", systemImage: "target")
-                Spacer()
-                Text("\(profile.studyGoal)")
-                    .foregroundStyle(.secondary)
-            }
-
-            Stepper(
-                value: $profile.studyGoal,
-                in: 5...100,
-                step: 5
-            ) {
+        Section("Daily study goal") {
+            Stepper(value: $profile.studyGoal, in: 5...100, step: 5) {
                 Text("Goal: \(profile.studyGoal) cards")
-                    .foregroundStyle(.secondary)
             }
             .onChange(of: profile.studyGoal) { _, _ in
                 saveProfile()
-                HapticManager.selection()
             }
         }
     }
 
-    // MARK: - Unlocks
-
     private var unlocksSection: some View {
-        Section("Unlocks") {
+        Section("Rewards") {
             Button {
                 showUnlocks = true
-                HapticManager.impact()
             } label: {
-                Label("View Unlocks", systemImage: "lock.open.fill")
+                Label("View rank badges & unlocks", systemImage: "medal.fill")
                     .foregroundStyle(VerbaTheme.green)
             }
         }
     }
 
-    // MARK: - Subjects
-
     private var subjectsSection: some View {
-        Section("Favourite Subjects") {
+        Section("Favourite subjects") {
             if profile.preferredSubjects.isEmpty {
-                Text("No subjects selected. Tap to add some.")
+                Text("No subjects selected yet.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             } else {
@@ -175,7 +139,7 @@ struct ProfileView: View {
             NavigationLink {
                 subjectPickerView
             } label: {
-                Label("Edit Subjects", systemImage: "pencil")
+                Label("Edit subjects", systemImage: "pencil")
             }
         }
     }
@@ -185,7 +149,6 @@ struct ProfileView: View {
             let isSelected = profile.preferredSubjects.contains(subject)
             Button {
                 toggleSubject(subject)
-                HapticManager.selection()
             } label: {
                 HStack {
                     Label(subject.name, systemImage: subject.icon)
@@ -202,40 +165,51 @@ struct ProfileView: View {
         .navigationTitle("Subjects")
     }
 
-    // MARK: - Danger Zone
-
     private var dangerSection: some View {
         Section("Data") {
             Button(role: .destructive) {
                 showDeleteConfirmation = true
             } label: {
-                Label("Reset Profile Data", systemImage: "trash")
+                Label("Reset profile data", systemImage: "trash")
             }
         }
     }
 
-    // MARK: - Edit Profile Sheet
-
     private var editProfileSheet: some View {
         NavigationStack {
             Form {
-                Section("About You") {
-                    HStack {
-                        Text("Name")
-                        Spacer()
-                        TextField("Your name", text: $profile.name)
-                            .multilineTextAlignment(.trailing)
-                    }
+                Section("About you") {
+                    TextField("Name", text: $profile.name)
+                    TextField("Grade", text: $profile.grade)
+                    TextField("Email", text: $profile.email)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .keyboardType(.emailAddress)
+                    Stepper("Age: \(max(profile.age, 10))", value: Binding(
+                        get: { max(profile.age, 10) },
+                        set: { profile.age = $0 }
+                    ), in: 10...100)
+                }
 
-                    HStack {
-                        Text("Age")
-                        Spacer()
-                        TextField("Age", text: Binding(
-                            get: { String(profile.age > 0 ? profile.age : 0) },
-                            set: { profile.age = Int($0) ?? 0 }
-                        ))
-                        .multilineTextAlignment(.trailing)
-                        .keyboardType(.numberPad)
+                Section("Avatar") {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 72))], spacing: 12) {
+                        ForEach(AvatarOption.all) { avatar in
+                            Button {
+                                profile.avatarSymbol = avatar.symbol
+                            } label: {
+                                VStack(spacing: 8) {
+                                    Image(systemName: avatar.symbol)
+                                        .font(.title2)
+                                        .frame(width: 52, height: 52)
+                                        .background(profile.avatarSymbol == avatar.symbol ? VerbaTheme.green : VerbaTheme.cream)
+                                        .foregroundStyle(profile.avatarSymbol == avatar.symbol ? .white : VerbaTheme.green)
+                                        .clipShape(Circle())
+                                    Text(avatar.name)
+                                        .font(.caption2)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
                 }
             }
@@ -257,21 +231,29 @@ struct ProfileView: View {
         }
     }
 
-    // MARK: - Persistence
-
     private func loadProfile() {
         let defaults = UserDefaults.standard
         profile.name = defaults.string(forKey: "profile.name") ?? ""
+        profile.grade = defaults.string(forKey: "profile.grade") ?? ""
         profile.age = defaults.integer(forKey: "profile.age")
+        profile.email = defaults.string(forKey: "profile.email") ?? ""
+        profile.avatarSymbol = defaults.string(forKey: "profile.avatar") ?? "books.vertical.fill"
         profile.studyGoal = defaults.integer(forKey: "profile.studyGoal")
         if profile.studyGoal == 0 { profile.studyGoal = 20 }
+
+        let savedSubjects = defaults.stringArray(forKey: "profile.subjects") ?? []
+        profile.preferredSubjects = Subject.all.filter { savedSubjects.contains($0.name) }
     }
 
     private func saveProfile() {
         let defaults = UserDefaults.standard
         defaults.set(profile.name, forKey: "profile.name")
+        defaults.set(profile.grade, forKey: "profile.grade")
         defaults.set(profile.age, forKey: "profile.age")
+        defaults.set(profile.email, forKey: "profile.email")
+        defaults.set(profile.avatarSymbol, forKey: "profile.avatar")
         defaults.set(profile.studyGoal, forKey: "profile.studyGoal")
+        defaults.set(profile.preferredSubjects.map(\.name), forKey: "profile.subjects")
     }
 
     private func toggleSubject(_ subject: Subject) {

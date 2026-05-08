@@ -1,31 +1,84 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct DocumentDetailView: View {
     @Environment(\.modelContext) private var modelContext
+    @AppStorage("groq.apiKey") private var groqAPIKey = ""
 
     @Bindable var document: Document
 
+    @State private var selectedItem: StudyItem?
+    @State private var isGenerating = false
+
+    private var items: [StudyItem] { document.studyItems ?? [] }
+
     var body: some View {
         List {
-            Section("Text") {
+            Section("Overview") {
+                HStack {
+                    Label(document.sourceType.displayName, systemImage: document.sourceType.systemIcon)
+                    Spacer()
+                    Text("\(StudyEngine.mastery(for: document))% mastery")
+                        .foregroundStyle(VerbaTheme.green)
+                        .fontWeight(.semibold)
+                }
+
+                HStack {
+                    Label("Created", systemImage: "calendar")
+                    Spacer()
+                    Text(document.createdAt.formatted(date: .abbreviated, time: .omitted))
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Section("Source Text") {
                 Text(document.extractedText.isEmpty ? "No extracted text" : document.extractedText)
                     .font(.body)
             }
 
             Section("Study Cards") {
-                let items = document.studyItems ?? []
                 if items.isEmpty {
                     Text("No cards generated yet")
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(items) { item in
-                        VStack(alignment: .leading, spacing: 6) {
+                        VStack(alignment: .leading, spacing: 10) {
                             Text(item.question)
                                 .font(.headline)
                             Text(item.answer)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
+
+                            HStack {
+                                Text("\(StudyEngine.mastery(for: item))% mastery")
+                                    .font(.caption)
+                                    .foregroundStyle(VerbaTheme.green)
+                                Spacer()
+                                Button("Deep Explain") {
+                                    selectedItem = item
+                                }
+                                .buttonStyle(.borderless)
+                            }
+                        }
+                        .padding(.vertical, 6)
+                    }
+                }
+            }
+
+            if !StudyEngine.weakTopics(from: items).isEmpty {
+                Section("Weak Topics") {
+                    ForEach(StudyEngine.weakTopics(from: items).prefix(3)) { topic in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(topic.topic)
+                                Text("\(topic.cardCount) cards")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Text("\(topic.mastery)%")
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.orange)
                         }
                     }
                 }
@@ -33,20 +86,37 @@ struct DocumentDetailView: View {
         }
         .navigationTitle(document.title.isEmpty ? "Untitled" : document.title)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Generate") {
-                    generateCards()
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                NavigationLink {
+                    TodayPracticeView(items: items, sessionTitle: document.title.isEmpty ? "Document Practice" : document.title)
+                } label: {
+                    Image(systemName: "play.fill")
                 }
-                .disabled(document.extractedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                Button(isGenerating ? "…" : "Regenerate") {
+                    Task { await generateCards() }
+                }
+                .disabled(isGenerating || document.extractedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
+        }
+        .sheet(item: $selectedItem) { item in
+            TutorView(item: item, startsWithDeepExplain: true)
         }
     }
 
-    private func generateCards() {
-        let generated = StudyGenerator.generateCards(from: document.extractedText, documentTitle: document.title, maxCards: 20)
-        guard !generated.isEmpty else { return }
+    @MainActor
+    private func generateCards() async {
+        isGenerating = true
+        let generated = await FlashcardGenerationService.generateCards(
+            from: document.extractedText,
+            documentTitle: document.title,
+            groqAPIKey: groqAPIKey
+        )
+        guard !generated.isEmpty else {
+            isGenerating = false
+            return
+        }
 
-        var existingQuestions = Set((document.studyItems ?? []).map { $0.question.lowercased() })
+        var existingQuestions = Set(items.map { $0.question.lowercased() })
         for item in generated {
             let key = item.question.lowercased()
             guard !existingQuestions.contains(key) else { continue }
@@ -54,5 +124,7 @@ struct DocumentDetailView: View {
             document.studyItems?.append(item)
             existingQuestions.insert(key)
         }
+        try? modelContext.save()
+        isGenerating = false
     }
 }

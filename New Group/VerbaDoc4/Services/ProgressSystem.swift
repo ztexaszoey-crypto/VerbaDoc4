@@ -16,21 +16,21 @@ enum Rank: Int, CaseIterable, Equatable {
 
     var name: String {
         switch self {
-        case .initiate:  return "Initiate"
-        case .scholar:   return "Scholar"
-        case .analyst:   return "Analyst"
-        case .architect: return "Architect"
-        case .master:    return "Master"
+        case .initiate:  return "Bronze"
+        case .scholar:   return "Silver"
+        case .analyst:   return "Gold"
+        case .architect: return "Platinum"
+        case .master:    return "Diamond"
         }
     }
 
     var color: Color {
         switch self {
-        case .initiate:  return Color(red: 0.20, green: 0.82, blue: 0.90)
-        case .scholar:   return Color(red: 0.35, green: 0.76, blue: 0.57)
-        case .analyst:   return Color(red: 0.25, green: 0.55, blue: 0.95)
-        case .architect: return Color(red: 1.00, green: 0.78, blue: 0.15)
-        case .master:    return Color(red: 0.70, green: 0.40, blue: 0.95)
+        case .initiate:  return Color(red: 0.61, green: 0.39, blue: 0.23)
+        case .scholar:   return Color(red: 0.74, green: 0.75, blue: 0.78)
+        case .analyst:   return Color(red: 0.96, green: 0.78, blue: 0.24)
+        case .architect: return Color(red: 0.65, green: 0.74, blue: 0.84)
+        case .master:    return Color(red: 0.54, green: 0.82, blue: 0.96)
         }
     }
 
