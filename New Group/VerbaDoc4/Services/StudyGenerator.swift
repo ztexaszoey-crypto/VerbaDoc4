@@ -1,11 +1,18 @@
 import Foundation
 import Combine
 
-enum StudyGenerator {
+final class StudyGenerator {
+    static let shared = StudyGenerator()
     private static let fallbackQuestionWordCount = 8
     private static let fallbackAnswerWordCount = 6
 
+    private init() {}
+
     static func generateCards(from text: String, documentTitle: String? = nil, maxCards: Int = 20) -> [StudyItem] {
+        shared.generateCards(from: text, documentTitle: documentTitle, maxCards: maxCards)
+    }
+
+    func generateCards(from text: String, documentTitle: String? = nil, maxCards: Int = 20) -> [StudyItem] {
         guard maxCards > 0 else { return [] }
 
         let cleanedText = text
@@ -65,10 +72,10 @@ enum StudyGenerator {
         if cards.isEmpty {
             let words = cleanedText.split(whereSeparator: { !$0.isLetter && !$0.isNumber }).map(String.init)
             if words.count >= 6 {
-                let question = words.prefix(fallbackQuestionWordCount).joined(separator: " ")
+                let question = words.prefix(Self.fallbackQuestionWordCount).joined(separator: " ")
                 let answer = words
-                    .dropFirst(fallbackQuestionWordCount)
-                    .prefix(fallbackAnswerWordCount)
+                    .dropFirst(Self.fallbackQuestionWordCount)
+                    .prefix(Self.fallbackAnswerWordCount)
                     .joined(separator: " ")
                 cards.append(
                     StudyItem(
