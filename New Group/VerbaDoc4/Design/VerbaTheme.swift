@@ -13,33 +13,53 @@ enum VerbaTheme {
     static let dark = Color(hex: "1c1409")
     static let surf = Color(hex: "2c2215")
     static let danger = Color.red
+    static let textMain = ink
 
     static let radiusS: CGFloat = 8
     static let radiusM: CGFloat = 14
     static let radiusL: CGFloat = 20
     static let radiusXL: CGFloat = 32
 
-    static func serif(_ size: CGFloat, weight: Font.Weight = .regular, italic: Bool = false) -> Font {
+    static func serif(_ size: CGFloat, weight: SwiftUI.Font.Weight = .regular, italic: Bool = false) -> SwiftUI.Font {
         if italic {
             return .custom("InstrumentSerif-Italic", size: size)
         }
         return .custom("InstrumentSerif-Regular", size: size)
     }
 
-    static func sans(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+    static func sans(_ size: CGFloat, weight: SwiftUI.Font.Weight = .regular) -> SwiftUI.Font {
         let fontName = weight == .bold || weight == .heavy ? "Syne-Bold" : "Syne-Regular"
         return .custom(fontName, size: size)
     }
 
-    static func serifFallback(_ size: CGFloat, italic: Bool = false) -> Font {
+    static func serifFallback(_ size: CGFloat, italic: Bool = false) -> SwiftUI.Font {
         if italic {
             return .system(size: size, design: .serif).italic()
         }
         return .system(size: size, design: .serif)
     }
 
-    static func sansFallback(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+    static func sansFallback(_ size: CGFloat, weight: SwiftUI.Font.Weight = .regular) -> SwiftUI.Font {
         .system(size: size, weight: weight, design: .rounded)
+    }
+
+    // Compatibility API for older call sites that use VerbaTheme.Font.*
+    enum Font {
+        static func serif(_ size: CGFloat, weight: SwiftUI.Font.Weight = .regular, italic: Bool = false) -> SwiftUI.Font {
+            VerbaTheme.serif(size, weight: weight, italic: italic)
+        }
+
+        static func sans(_ size: CGFloat, weight: SwiftUI.Font.Weight = .regular) -> SwiftUI.Font {
+            VerbaTheme.sans(size, weight: weight)
+        }
+
+        static func serifFallback(_ size: CGFloat, italic: Bool = false) -> SwiftUI.Font {
+            VerbaTheme.serifFallback(size, italic: italic)
+        }
+
+        static func sansFallback(_ size: CGFloat, weight: SwiftUI.Font.Weight = .regular) -> SwiftUI.Font {
+            VerbaTheme.sansFallback(size, weight: weight)
+        }
     }
 }
 

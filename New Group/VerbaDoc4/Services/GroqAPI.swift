@@ -101,6 +101,61 @@ enum GroqAPI {
             )
         }
     }
+
+    static func deepExplain(for item: StudyItem, apiKey: String) async throws -> String {
+        try await deepExplain(
+            question: item.question,
+            answer: item.answer,
+            explanation: item.explanation,
+            apiKey: apiKey
+        )
+    }
+
+    static func deepExplain(
+        question: String,
+        answer: String,
+        explanation: String,
+        apiKey: String
+    ) async throws -> String {
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        let body: [String: Any] = [
+            "model": model,
+            "messages": [
+                [
+                    "role": "system",
+                    "content": "You are a tutor. Give a concise deep explanation with one concrete example."
+                ],
+                [
+                    "role": "user",
+                    "content": """
+                    Question: \(question)
+                    Answer: \(answer)
+                    Current explanation: \(explanation)
+                    """
+                ]
+            ],
+            "temperature": 0.4
+        ]
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            throw GroqAPIError.invalidResponse
+        }
+
+        let groqResponse = try JSONDecoder().decode(GroqResponse.self, from: data)
+        guard let content = groqResponse.choices.first?.message.content
+            .trimmingCharacters(in: .whitespacesAndNewlines), !content.isEmpty else {
+            throw GroqAPIError.emptyContent
+        }
+
+        return content
+    }
 }
 
 // MARK: - Groq response types (private)
