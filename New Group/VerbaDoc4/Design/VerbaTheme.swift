@@ -43,6 +43,7 @@ enum VerbaTheme {
         .system(size: size, weight: weight, design: .rounded)
     }
 
+    // Compatibility API for older call sites that use VerbaTheme.Font.*
     enum Font {
         static func serif(_ size: CGFloat, weight: SwiftUI.Font.Weight = .regular, italic: Bool = false) -> SwiftUI.Font {
             VerbaTheme.serif(size, weight: weight, italic: italic)

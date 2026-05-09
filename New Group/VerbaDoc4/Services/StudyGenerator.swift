@@ -9,10 +9,6 @@ final class StudyGenerator {
     private init() {}
 
     static func generateCards(from text: String, documentTitle: String? = nil, maxCards: Int = 20) -> [StudyItem] {
-        shared.generateCards(from: text, documentTitle: documentTitle, maxCards: maxCards)
-    }
-
-    func generateCards(from text: String, documentTitle: String? = nil, maxCards: Int = 20) -> [StudyItem] {
         guard maxCards > 0 else { return [] }
 
         let cleanedText = text
@@ -89,5 +85,9 @@ final class StudyGenerator {
         }
 
         return cards
+    }
+
+    func generateCards(from text: String, documentTitle: String? = nil, maxCards: Int = 20) -> [StudyItem] {
+        Self.generateCards(from: text, documentTitle: documentTitle, maxCards: maxCards)
     }
 }
