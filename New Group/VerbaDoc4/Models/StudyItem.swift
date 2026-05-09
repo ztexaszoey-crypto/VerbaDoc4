@@ -1,9 +1,8 @@
 import Foundation
-import Combine
 import SwiftData
 
 @Model
-final class StudyItem: ObservableObject {
+final class StudyItem {
     var question:     String
     var answer:       String
     var explanation:  String
