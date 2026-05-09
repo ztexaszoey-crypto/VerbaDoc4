@@ -86,8 +86,4 @@ final class StudyGenerator {
 
         return cards
     }
-
-    func generateCards(from text: String, documentTitle: String? = nil, maxCards: Int = 20) -> [StudyItem] {
-        Self.generateCards(from: text, documentTitle: documentTitle, maxCards: maxCards)
-    }
 }
