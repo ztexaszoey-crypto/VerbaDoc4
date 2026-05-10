@@ -1,86 +1,72 @@
 import Foundation
-import Combine
+import SwiftData
 
-enum StudyGenerator {
-    private static let fallbackQuestionWordCount = 8
-    private static let fallbackAnswerWordCount = 6
-
-    static func generateCards(from text: String, documentTitle: String? = nil, maxCards: Int = 20) -> [StudyItem] {
-        guard maxCards > 0 else { return [] }
-
-        let cleanedText = text
-            .replacingOccurrences(of: "\r\n", with: "\n")
-            .replacingOccurrences(of: "\r", with: "\n")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-
-        guard !cleanedText.isEmpty else { return [] }
-
-        let separators = CharacterSet(charactersIn: ".!?\n")
-        let rawSegments = cleanedText
-            .components(separatedBy: separators)
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-
-        var seen = Set<String>()
-        let uniqueSegments = rawSegments.filter { segment in
-            let normalized = segment.lowercased()
-            if seen.contains(normalized) { return false }
-            seen.insert(normalized)
-            return true
-        }
-
-        var cards: [StudyItem] = []
-
-        for segment in uniqueSegments {
-            if cards.count >= maxCards { break }
-
-            let words = segment.split(whereSeparator: { !$0.isLetter && !$0.isNumber })
-            guard words.count >= 4 else { continue }
-
-            guard let focusWord = words
-                .map(String.init)
-                .filter({ $0.count >= 4 })
-                .sorted(by: { $0.count > $1.count })
-                .first
-            else {
-                continue
-            }
-
-            let masked = segment.replacingOccurrences(of: focusWord, with: "____", options: [.caseInsensitive, .diacriticInsensitive])
-            guard masked != segment else { continue }
-
-            let explanationPrefix = documentTitle?.isEmpty == false ? "From \(documentTitle!):" : "From your material:"
-            let explanation = "\(explanationPrefix) \(segment)"
-
-            cards.append(
-                StudyItem(
-                    question: masked,
-                    answer: focusWord,
-                    explanation: explanation,
-                    documentTitle: documentTitle
-                )
+class StudyGenerator {
+    static let shared = StudyGenerator()
+    
+    init() {}
+    
+    // MARK: - Public Methods
+    
+    func generateFlashcards(for document: Document) async throws {
+        let prompt = """
+        Generate comprehensive flashcard study materials from the following text.
+        Create 5-10 question-answer pairs that cover the key concepts.
+        Format as JSON array with objects containing "question" and "answer" fields.
+        
+        Text:
+        \(document.content)
+        
+        Return ONLY valid JSON, no markdown or explanations.
+        """
+        
+        let explanation = try await GroqAPI.shared.generateFlashcardExplanation(
+            question: "Generate flashcards",
+            answer: document.content
+        )
+        
+        let flashcards = try parseFlashcards(from: explanation)
+        
+        // Save to SwiftData
+        for flashcard in flashcards {
+            let studyItem = StudyItem(
+                question: flashcard.question,
+                answer: flashcard.answer
             )
+            studyItem.document = document
+            document.studyItems.append(studyItem)
         }
-
-        if cards.isEmpty {
-            let words = cleanedText.split(whereSeparator: { !$0.isLetter && !$0.isNumber }).map(String.init)
-            if words.count >= 6 {
-                let question = words.prefix(fallbackQuestionWordCount).joined(separator: " ")
-                let answer = words
-                    .dropFirst(fallbackQuestionWordCount)
-                    .prefix(fallbackAnswerWordCount)
-                    .joined(separator: " ")
-                cards.append(
-                    StudyItem(
-                        question: "Continue this thought: \(question)…",
-                        answer: answer.isEmpty ? question : answer,
-                        explanation: cleanedText,
-                        documentTitle: documentTitle
-                    )
-                )
+    }
+    
+    func regenerateFlashcards(for document: Document) async throws {
+        // Clear existing flashcards
+        document.studyItems.removeAll()
+        
+        // Generate new ones
+        try await generateFlashcards(for: document)
+    }
+    
+    // MARK: - Private Methods
+    
+    private func parseFlashcards(from json: String) throws -> [FlashcardData] {
+        // Extract JSON from potential markdown code blocks
+        var jsonString = json
+        if jsonString.contains("```json") {
+            if let start = jsonString.range(of: "```json"),
+               let end = jsonString.range(of: "```", range: jsonString.index(start.lowerBound, offsetBy: 7)..<jsonString.endIndex) {
+                jsonString = String(jsonString[start.upperBound..<end.lowerBound])
             }
         }
-
-        return cards
+        
+        let decoder = JSONDecoder()
+        let flashcards = try decoder.decode([FlashcardData].self, from: jsonString.data(using: .utf8)!)
+        return flashcards
     }
+}
+
+// MARK: - Models
+
+struct FlashcardData: Codable {
+    let question: String
+    let answer: String
 }

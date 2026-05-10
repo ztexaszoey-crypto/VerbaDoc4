@@ -1,118 +1,143 @@
 import Foundation
 
-// MARK: - StudyTask
-
-struct StudyTask: Codable {
-    let question: String
-    let answer: String
-    let explanation: String
-}
-
-// MARK: - GroqAPI
-
-enum GroqAPI {
-    private static let endpoint = URL(string: "https://api.groq.com/openai/v1/chat/completions")!
-    /// llama3-8b-8192: 8B parameter LLaMA 3 model with an 8,192-token context window.
-    private static let model = "llama3-8b-8192"
-    /// Maximum characters of source text sent to the API to stay within the model's context window.
-    private static let maxInputTextLength = 3000
-
-    enum GroqAPIError: Error {
-        case invalidResponse
-        case emptyContent
-        case decodingFailed
+class GroqAPI {
+    static let shared = GroqAPI()
+    
+    private let apiKey: String
+    private let baseURL = "https://api.groq.com/openai/v1"
+    
+    init() {
+        // Load API key from environment or configuration
+        self.apiKey = ProcessInfo.processInfo.environment["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"] ?? ""
     }
-
-    /// Generates study flashcard tasks from text using the Groq AI API.
-    /// - Parameters:
-    ///   - text: The source text to generate cards from.
-    ///   - apiKey: A valid Groq API key.
-    ///   - maxTasks: Maximum number of cards to request (default 10).
-    /// - Returns: An array of `StudyTask` values decoded from the model's JSON response.
-    static func generateTasks(
-        from text: String,
-        apiKey: String,
-        maxTasks: Int = 10
-    ) async throws -> [StudyTask] {
-        var request = URLRequest(url: endpoint)
+    
+    // MARK: - Public Methods
+    
+    func deepExplain(for studyItem: StudyItem) async throws -> String {
+        let prompt = """
+        Please provide a deep, comprehensive explanation of the following:
+        
+        Question: \(studyItem.question)
+        Answer: \(studyItem.answer)
+        
+        Provide:
+        1. A detailed explanation of the concept
+        2. Real-world examples
+        3. Common misconceptions to avoid
+        4. How this relates to other topics
+        """
+        
+        return try await chat(message: prompt)
+    }
+    
+    func generateFlashcardExplanation(question: String, answer: String) async throws -> String {
+        let prompt = """
+        Explain this study material clearly and comprehensively:
+        Q: \(question)
+        A: \(answer)
+        """
+        
+        return try await chat(message: prompt)
+    }
+    
+    // MARK: - Private Methods
+    
+    private func chat(message: String) async throws -> String {
+        var request = URLRequest(url: URL(string: "\(baseURL)/chat/completions")!)
         request.httpMethod = "POST"
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        let truncatedText = String(text.prefix(maxInputTextLength))
-        let systemPrompt = """
-        You are a helpful study assistant that creates concise flashcard pairs. \
-        Return ONLY a valid JSON array where each element has exactly these fields: \
-        "question", "answer", and "explanation". Do not include any other text.
-        """
-        let userPrompt = """
-        Generate \(maxTasks) study flashcard pairs from the following text:
-
-        \(truncatedText)
-        """
-
-        let body: [String: Any] = [
-            "model": model,
-            "messages": [
-                ["role": "system", "content": systemPrompt],
-                ["role": "user", "content": userPrompt]
-            ],
-            "temperature": 0.3
-        ]
-
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
-
+        
+        let payload = ChatRequest(
+            model: "mixtral-8x7b-32768",
+            messages: [ChatMessage(role: "user", content: message)],
+            maxTokens: 1024,
+            temperature: 0.7
+        )
+        
+        request.httpBody = try JSONEncoder().encode(payload)
+        
         let (data, response) = try await URLSession.shared.data(for: request)
-
-        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+        
+        guard let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) else {
             throw GroqAPIError.invalidResponse
         }
-
-        let groqResponse = try JSONDecoder().decode(GroqResponse.self, from: data)
-
-        guard let content = groqResponse.choices.first?.message.content,
-              !content.isEmpty
-        else {
-            throw GroqAPIError.emptyContent
+        
+        let decoder = JSONDecoder()
+        let chatResponse = try decoder.decode(ChatResponse.self, from: data)
+        
+        guard let firstChoice = chatResponse.choices.first else {
+            throw GroqAPIError.noContentReturned
         }
-
-        // The model may wrap the JSON in a markdown code block; strip it.
-        let jsonString = content
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .replacingOccurrences(of: "^```(?:json)?\\s*", with: "", options: .regularExpression)
-            .replacingOccurrences(of: "\\s*```$", with: "", options: .regularExpression)
-
-        guard let jsonData = jsonString.data(using: .utf8) else {
-            throw GroqAPIError.decodingFailed
-        }
-
-        let tasks = try JSONDecoder().decode([StudyTask].self, from: jsonData)
-        return tasks
-    }
-
-    /// Converts an array of `StudyTask` values to `StudyItem` SwiftData models.
-    static func toStudyItems(_ tasks: [StudyTask], documentTitle: String? = nil) -> [StudyItem] {
-        tasks.map { task in
-            StudyItem(
-                question: task.question,
-                answer: task.answer,
-                explanation: task.explanation,
-                documentTitle: documentTitle
-            )
-        }
+        
+        return firstChoice.message.content
     }
 }
 
-// MARK: - Groq response types (private)
+// MARK: - Models
 
-private struct GroqResponse: Decodable {
-    let choices: [Choice]
-
-    struct Choice: Decodable {
-        let message: Message
+struct ChatRequest: Codable {
+    let model: String
+    let messages: [ChatMessage]
+    let maxTokens: Int
+    let temperature: Double
+    
+    enum CodingKeys: String, CodingKey {
+        case model
+        case messages
+        case maxTokens = "max_tokens"
+        case temperature
     }
+}
 
-    struct Message: Decodable {
-        let content: String
+struct ChatMessage: Codable {
+    let role: String // "user" or "assistant"
+    let content: String
+}
+
+struct ChatResponse: Codable {
+    let choices: [ChatChoice]
+    let usage: ChatUsage?
+}
+
+struct ChatChoice: Codable {
+    let message: ChatMessage
+    let finishReason: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case message
+        case finishReason = "finish_reason"
+    }
+}
+
+struct ChatUsage: Codable {
+    let promptTokens: Int
+    let completionTokens: Int
+    let totalTokens: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case promptTokens = "prompt_tokens"
+        case completionTokens = "completion_tokens"
+        case totalTokens = "total_tokens"
+    }
+}
+
+enum GroqAPIError: LocalizedError {
+    case invalidResponse
+    case noContentReturned
+    case invalidURL
+    case networkError(Error)
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalidResponse:
+            return "Invalid response from Groq API"
+        case .noContentReturned:
+            return "No content returned from API"
+        case .invalidURL:
+            return "Invalid URL"
+        case .networkError(let error):
+            return "Network error: \(error.localizedDescription)"
+        }
     }
 }

@@ -1,50 +1,76 @@
-import Foundation
-import Combine
+import SwiftUI
+import SwiftData
 
-@MainActor
-final class StreakManager: ObservableObject {
-    @Published private(set) var currentStreak: Int = 0
-
-    private let defaults: UserDefaults
-    private let streakKey = "streak.current"
-    private let lastStudyDateKey = "streak.lastStudyDate"
-
-    init(defaults: UserDefaults = .standard) {
-        self.defaults = defaults
-        currentStreak = defaults.integer(forKey: streakKey)
+@Observable
+class StreakManager {
+    var currentStreak: Int = 0
+    var longestStreak: Int = 0
+    var lastStudyDate: Date?
+    var totalStudyDays: Int = 0
+    var todayStudied: Bool = false
+    
+    init() {
+        loadStreakData()
     }
-
-    func markStudyCompleted(on date: Date = Date(), calendar: Calendar = .current) {
-        let today = calendar.startOfDay(for: date)
-
-        guard let lastDate = defaults.object(forKey: lastStudyDateKey) as? Date else {
-            currentStreak = 1
-            persist(today)
+    
+    // MARK: - Streak Management
+    
+    func recordStudySession() {
+        let today = Calendar.current.startOfDay(for: Date())
+        let lastDate = lastStudyDate.map { Calendar.current.startOfDay(for: $0) }
+        
+        if lastDate == today {
+            // Already studied today
             return
         }
-
-        let lastDay = calendar.startOfDay(for: lastDate)
-        if lastDay == today {
-            return
-        }
-
-        if let yesterday = calendar.date(byAdding: .day, value: -1, to: today), lastDay == yesterday {
+        
+        if let lastDate = lastDate, Calendar.current.dateComponents([.day], from: lastDate, to: today).day == 1 {
+            // Streak continues
             currentStreak += 1
-        } else {
+        } else if lastDate == nil || Calendar.current.dateComponents([.day], from: lastDate!, to: today).day! > 1 {
+            // Streak broken or first time
             currentStreak = 1
         }
-
-        persist(today)
+        
+        lastStudyDate = Date()
+        totalStudyDays += 1
+        todayStudied = true
+        
+        if currentStreak > longestStreak {
+            longestStreak = currentStreak
+        }
+        
+        saveStreakData()
     }
-
-    func reset() {
-        currentStreak = 0
-        defaults.removeObject(forKey: streakKey)
-        defaults.removeObject(forKey: lastStudyDateKey)
+    
+    // MARK: - Persistence
+    
+    private func loadStreakData() {
+        if let data = UserDefaults.standard.data(forKey: "streakData"),
+           let decoded = try? JSONDecoder().decode(StreakData.self, from: data) {
+            currentStreak = decoded.currentStreak
+            longestStreak = decoded.longestStreak
+            lastStudyDate = decoded.lastStudyDate
+            totalStudyDays = decoded.totalStudyDays
+        }
     }
-
-    private func persist(_ date: Date) {
-        defaults.set(currentStreak, forKey: streakKey)
-        defaults.set(date, forKey: lastStudyDateKey)
+    
+    private func saveStreakData() {
+        let data = StreakData(
+            currentStreak: currentStreak,
+            longestStreak: longestStreak,
+            lastStudyDate: lastStudyDate,
+            totalStudyDays: totalStudyDays
+        )
+        if let encoded = try? JSONEncoder().encode(data) {
+            UserDefaults.standard.set(encoded, forKey: "streakData")
+        }
     }
+}
+
+struct StreakData: Codable {
+    let currentStreak: Int
+    let longestStreak: Int
+    let lastStudyDate: Date?
+    let totalStudyDays: Int
 }
