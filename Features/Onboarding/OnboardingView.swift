@@ -8,7 +8,7 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [VerbaTheme.ink, VerbaTheme.background], startPoint: .topLeading, endPoint: .bottomTrailing)
+            LinearGradient(colors: [VerbaTheme.dark, VerbaTheme.surf], startPoint: .topLeading, endPoint: .bottomTrailing)
                 .ignoresSafeArea()
 
             VStack(spacing: 24) {
