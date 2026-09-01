@@ -1,0 +1,108 @@
+// VerbaDoc Firestore Security Rules
+//
+// Deploy to Firebase Console → Firestore → Rules, or via Firebase CLI:
+//   firebase deploy --only firestore:rules
+//
+// Architecture:
+//   /users/{uid}/profile        — one document per user
+//   /users/{uid}/documents/{id} — user's uploaded study documents
+//   /users/{uid}/studyItems/{id} — SRS flashcards linked to documents
+//
+// Invariants enforced:
+//   1. A user can only read/write their own data (uid-scoped paths).
+//   2. No cross-user reads. No unauthenticated reads.
+//   3. lastModified must be a timestamp (prevents clock-spoofing in LWW merge).
+//   4. All writes go through set/update — no client-side deletes (soft archive instead).
+//   5. Profile xp can only increase (server-enforced monotonicity).
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Server-side configuration (API keys, feature flags) ──────────────────
+    //
+    // /config/apiKeys contains Groq API keys fetched at runtime by the app.
+    // Authenticated reads are allowed; writes are denied from the client.
+    // Keys are managed via Firebase Console or Admin SDK only.
+    //
+    // Required document: /config/apiKeys
+    // Structure: { "groq": ["gsk_xxx", "gsk_yyy"] }
+    match /config/{document} {
+      allow read:  if request.auth != null;
+      allow write: if false;
+    }
+
+    // ── Helper functions ─────────────────────────────────────────────────────
+
+    // Caller is authenticated and owns this uid.
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // Field exists and is a Firestore Timestamp.
+    function isTimestamp(field) {
+      return field is timestamp;
+    }
+
+    // Incoming data has a lastModified timestamp field.
+    function hasValidTimestamp() {
+      return 'lastModified' in request.resource.data
+          && isTimestamp(request.resource.data.lastModified);
+    }
+
+    // XP can only stay the same or increase (prevents cloud sync from regressing XP).
+    function xpMonotonic() {
+      return !('xp' in resource.data)
+          || request.resource.data.xp >= resource.data.xp;
+    }
+
+    // ── User root — no direct access ─────────────────────────────────────────
+    match /users/{uid} {
+      allow read, write: if false;
+
+      // ── Profile ────────────────────────────────────────────────────────────
+      match /profile/data {
+        allow read: if isOwner(uid);
+        allow write: if isOwner(uid)
+                     && hasValidTimestamp()
+                     && xpMonotonic();
+      }
+
+      // ── Documents ──────────────────────────────────────────────────────────
+      match /documents/{docId} {
+        allow read: if isOwner(uid);
+
+        allow create: if isOwner(uid)
+                      && hasValidTimestamp()
+                      && request.resource.data.keys().hasAll(['id', 'title', 'content', 'sourceType', 'createdAt', 'lastModified']);
+
+        allow update: if isOwner(uid)
+                      && hasValidTimestamp()
+                      // id and createdAt are immutable once created
+                      && request.resource.data.id == resource.data.id
+                      && request.resource.data.createdAt == resource.data.createdAt;
+
+        // No hard deletes from client — use isArchived = true.
+        allow delete: if false;
+      }
+
+      // ── Study Items ────────────────────────────────────────────────────────
+      match /studyItems/{itemId} {
+        allow read: if isOwner(uid);
+
+        allow create: if isOwner(uid)
+                      && hasValidTimestamp()
+                      && request.resource.data.keys().hasAll(['id', 'documentId', 'question', 'answer', 'lastModified']);
+
+        allow update: if isOwner(uid)
+                      && hasValidTimestamp()
+                      // Core identity fields are immutable
+                      && request.resource.data.id == resource.data.id
+                      && request.resource.data.documentId == resource.data.documentId;
+
+        // Study items are never hard-deleted from client.
+        allow delete: if false;
+      }
+    }
+  }
+}

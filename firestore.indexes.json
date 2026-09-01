@@ -1,0 +1,19 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "documents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "lastModified", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "studyItems",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "lastModified", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

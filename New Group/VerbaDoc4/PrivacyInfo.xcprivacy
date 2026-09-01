@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+
+    <!--
+        VerbaDoc Privacy Manifest
+        ─────────────────────────
+        This app does NOT track users. Study content is sent to the Groq API
+        solely to generate flashcards and exam questions on behalf of the user.
+        No data is sold, shared for advertising, or used for profiling.
+    -->
+
+    <!-- Tracking -->
+    <key>NSPrivacyTracking</key>
+    <false/>
+
+    <!-- No cross-app tracking domains -->
+    <key>NSPrivacyTrackingDomains</key>
+    <array/>
+
+    <!--
+        Collected data types.
+        VerbaDoc sends document text to api.groq.com to generate flashcards.
+        This is "Other Data Types" — user-provided content processed by a
+        third-party API on the user's explicit request.
+    -->
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array>
+        <dict>
+            <!-- User-provided document text sent to Groq API for flashcard generation -->
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypeOtherUserContent</string>
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+            </array>
+        </dict>
+    </array>
+
+    <!--
+        Required-reason APIs used by VerbaDoc app code only.
+
+        Audit result (Firebase iOS SDK 12.13.0, GoogleUtilities 8.1.0,
+        GoogleSignIn 9.1.0, verified 2026-05-22):
+        • Each SDK ships its own bundled PrivacyInfo.xcprivacy covering its
+          own UserDefaults access (CA92.1, 1C8F.1, C56D.1). The host app does
+          NOT need to re-declare SDK usage — Apple's policy is SDK-level coverage.
+        • App code directly accesses NSUserDefaults for: XP totals, streak data,
+          sync timestamps, daily challenge state, card depth setting, onboarding
+          flags. All reads/writes are on-device only → CA92.1.
+        • No FileTimestamp, SystemBootTime, or DiskSpace APIs used in app code.
+        • Keychain (SecureKeyStore) does not appear in the required-reason list.
+    -->
+    <key>NSPrivacyAccessedAPITypes</key>
+    <array>
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <string>CA92.1</string>
+            </array>
+        </dict>
+    </array>
+
+</dict>
+</plist>
