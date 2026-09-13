@@ -1,0 +1,6 @@
+# Secrets — NEVER commit these
+# Config.xcconfig holds the NVIDIA API key (NVIDIA_API_KEY).
+*.xcconfig
+
+# macOS noise
+.DS_Store
