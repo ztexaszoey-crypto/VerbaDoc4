@@ -410,3 +410,76 @@ it will show as **untracked** in `git status`. Add `NEXT-STEPS.md` to
 Grep target for the one unverified name collision: `grep -rnw 'ErrorKind' --include='*.swift' .`
 — `ErrorPresentation` and `VerbaErrorBanner` are specific enough to be safe,
 but `ErrorKind` is generic enough that `Features/` could already have one.
+---
+## 11. READ THIS BEFORE TRUSTING THIS REPO
+
+**Security: nothing sensitive appears to be published.** What was actually
+checked, via the GitHub API against this repo:
+- The path-filtered history query returns `[]` for **both** `Config.xcconfig`
+  and `VerbaDoc/Config.xcconfig` — meaning neither path was ever committed, and
+  no key was ever published *under those names*. This does not cover a
+  differently-named secrets file, so close it for certain with:
+  `git log --all --diff-filter=A --name-only | grep -iE 'xcconfig|secret|credential|\.env'`
+- No `*.xcconfig` appears in any directory listing or tree response fetched.
+  (One tree response was truncated, so this is cumulative evidence rather than
+  an exhaustive scan — the command above settles it.)
+- `VerbaDoc/.gitignore` lists `*.xcconfig`, so it cannot be added later. Note
+  its own comment names only `NVIDIA_API_KEY`; the file is also used for the
+  Groq key.
+- `NIMEmbeddingService.swift` contains **no** hardcoded key — it loads one via
+  `NVIDIAAPIKey` from the gitignored Config.xcconfig. An earlier warning in
+  chat claimed that file probably held a hardcoded `nvapi-` key. There is
+  nothing to rotate on that account.
+- The repo is **public**. Normal and expected for a CAC submission.
+
+**This repo holds TWO project trees. Read only one of them.**
+- `VerbaDoc/` — the live work: `.gitignore`, this file, and `VerbaDoc/`
+  containing **`Design/` and `Services/` only** as far as the API listings
+  show.
+- `New Group/VerbaDoc4/` — a complete *older* copy, with its own
+  `Features/`, `Models/`, `Theme/`, `RootTabView.swift`, `VerbaDoc4App.swift`
+  and `VerbaDoc4.xcodeproj`. It also contains files named
+  `Services/GroqAPI.swift` and `Services/StudyGenerator.swift`, which appear to
+  be an older direct-Groq client and generator (contents not read). **Do not
+  read this tree as the current state** — it is a likely reason a reader
+  concludes the generate-with-AI button calls Groq directly. In the live tree,
+  generation goes through `Services/Generation/StudyGenService.swift`, which
+  defaults to `AIChatRouter.shared` and is where the failover already lives.
+
+**Not yet present under the live `VerbaDoc/` tree** (so this snapshot cannot
+answer questions about them): `Features/`, `Models/`, `Theme/`,
+`RootTabView.swift`, `VerbaDocApp.swift`, `VerbaDoc.entitlements`, and the
+`VerbaDoc/VerbaDoc.xcodeproj` project file itself (it exists locally; it just
+isn't published). Separately, the commit that
+created this snapshot listed a `Models/MisconceptionMappingModels.swift` as new,
+which does not reconcile with the live tree showing no `Models/` directory —
+unresolved, worth checking.
+
+The live generation call site is inside `Features/`, so "which AI client does
+the button actually call?" is **still unverified**. That is the one question
+this push was meant to settle. To settle it, run these and paste the output:
+
+```bash
+cd /Users/zoey/Desktop/VerbaDoc
+git ls-files | grep -iE 'Features/|Theme/|RootTabView'   # empty = not in the repo's TRACKED files
+git status --short | head -30                            # anything still unstaged
+find . -name 'UploadTabView.swift' -not -path './.git/*' # every copy on disk - expect TWO hits
+```
+
+**Published vs on disk:** everything above describes what is *published*. These
+three commands are about what is on *your* disk, which can differ.
+
+The `find` will match the old `New Group/VerbaDoc4/` copy as well as any live
+copy. You may see two hits, and it does **not** tell you which one is current -
+compare the paths before concluding anything.
+
+Then publish this corrected doc, plus any live copy the `find` turned up:
+
+```bash
+bash ~/Desktop/VerbaDoc/VerbaDoc/snapshot-verbadoc.command
+```
+
+If `find` shows nothing outside `New Group/`, the live app is not at that path
+on this machine. Get the real path from Xcode instead - open the project, then
+**File → Reveal in Finder**, or read the path from Xcode's title bar - and use
+that path in the `cd` above.
