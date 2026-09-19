@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+
+    <!-- ── Tracking ──────────────────────────────────────────────────────── -->
+    <!-- VerbaDoc does not track users across apps or websites. -->
+    <key>NSPrivacyTracking</key>
+    <false/>
+
+    <key>NSPrivacyTrackingDomains</key>
+    <array/>
+
+    <!-- ── Required-Reason APIs ──────────────────────────────────────────── -->
+    <!--
+        UserDefaults is used to persist app-owned data:
+        study streaks, XP, game scores, reminder preferences.
+        No device identifiers or cross-app data are stored.
+        Reason CA92.1: access info the app itself previously stored.
+
+        Pasteboard is used only for explicit "paste from clipboard"
+        actions initiated by the user (e.g. pasting study notes).
+        Reason 1C8F.1: explicit user-initiated paste.
+
+        System boot-time timestamp is read to anchor notification
+        scheduling to wall-clock time. Reason C617.1: read clock to
+        schedule a local notification (StudyReminderService).
+        Reason 0A2A.1: read clock needed for time-sensitive alerts.
+    -->
+    <key>NSPrivacyAccessedAPITypes</key>
+    <array>
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <string>CA92.1</string>
+            </array>
+        </dict>
+        <dict>
+            <key>NSPrivacyAccessedAPIType</key>
+            <string>NSPrivacyAccessedAPICategoryPasteboard</string>
+            <key>NSPrivacyAccessedAPITypeReasons</key>
+            <array>
+                <string>1C8F.1</string>
+            </array>
+        </dict>
+    </array>
+
+    <!-- ── Collected Data Types ──────────────────────────────────────────── -->
+    <!--
+        Truthful declaration for App Store Connect "App Privacy" page.
+        Each entry below matches a real data flow in VerbaDoc so the
+        Nutrition Label answers reconcile with the App Privacy section.
+        No data is sold. No data is used for advertising or cross-app
+        tracking purposes.
+    -->
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array>
+
+        <!-- Contact Info ── Email Address ──────────────────────────────── -->
+        <!-- Collected at sign-up. Stored in Supabase auth. Used only for   -->
+        <!-- account authentication, password recovery, and Apple ID       -->
+        <!-- linking via RevenueCat. Not used for marketing.               -->
+        <dict>
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypeEmailAddress</string>
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <true/>
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+            </array>
+        </dict>
+
+        <!-- Identifiers ── User ID ──────────────────────────────────────── -->
+        <!-- Supabase auth.user.id is the durable primary key across all     -->
+        <!-- backend rows (decks, study items, plan, sync state). RevenueCat -->
+        <!-- receives this id so subscription history is tied to the user   -->
+        <!-- across reinstalls.  VerbaDoc has NO ad SDK, NO IDFA, and NO    -->
+        <!-- SKAdNetwork integration — PurposeDeveloperAdvertising must     -->
+        <!-- NOT be declared because declaring it triggers App Review to    -->
+        <!-- ask "what ad SDK supports this?" with no answer.               -->
+        <dict>
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypeUserID</string>
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <true/>
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+            </array>
+        </dict>
+
+        <!-- User Content ── Other User Content ──────────────────────────── -->
+        <!-- Documents, study items, notes, and AI prompts the user         -->
+        <!-- uploads or generates. Stored in SwiftData (local) and sent    -->
+        <!-- transiently to Supabase Edge Functions → Groq for AI          -->
+        <!-- processing. LINKED because they are tied to the user's       -->
+        <!-- Supabase auth user_id and persist across reinstalls when      -->
+        <!-- cloud sync is enabled.                                         -->
+        <dict>
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypeOtherUserContent</string>
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <true/>
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+            </array>
+        </dict>
+
+        <!-- Purchases ── Purchase History ───────────────────────────────── -->
+        <!-- RevenueCat holds the user's subscription tier + renewal       -->
+        <!-- history, scoped to the Supabase user_id. Used to unlock Pro    -->
+        <!-- features and gate Pro-only AI generation, decks, etc.         -->
+        <dict>
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypePurchaseHistory</string>
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <true/>
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+            </array>
+        </dict>
+
+        <!-- Usage Data ── Product Interaction ───────────────────────────── -->
+        <!-- AnalyticsManager tracks in-app events (signup, paywall view,   -->
+        <!-- AI generation, session completion, exam mode, runner score)   -->
+        <!-- Hashed via Supabase user_id so we can compute retention and   -->
+        <!-- study-mode conversion without crossing app boundaries.        -->
+        <dict>
+            <key>NSPrivacyCollectedDataType</key>
+            <string>NSPrivacyCollectedDataTypeProductInteraction</string>
+            <key>NSPrivacyCollectedDataTypeLinked</key>
+            <true/>
+            <key>NSPrivacyCollectedDataTypeTracking</key>
+            <false/>
+            <key>NSPrivacyCollectedDataTypePurposes</key>
+            <array>
+                <string>NSPrivacyCollectedDataTypePurposeAnalytics</string>
+            </array>
+        </dict>
+
+    </array>
+
+</dict>
+</plist>

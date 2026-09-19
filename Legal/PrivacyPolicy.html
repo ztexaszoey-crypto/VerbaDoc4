@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="VerbaDoc Privacy Policy: how the iOS study-app collects, uses, and protects student study data.">
+    <meta name="theme-color" content="#556B2F">
+    <title>Privacy Policy · VerbaDoc</title>
+    <style>
+        :root {
+            --bg:       #F4F4ED;
+            --card:     #FFFFFF;
+            --ink:      #293317;
+            --muted:    #697A4A;
+            --border:   #556B2F;
+            --accent:   #9CD443;
+        }
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            line-height: 1.6;
+            -webkit-text-size-adjust: 100%;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 32px 20px 80px;
+        }
+        header {
+            border-bottom: 1px solid rgba(85, 107, 47, 0.30);
+            padding-bottom: 18px;
+            margin-bottom: 28px;
+        }
+        h1 {
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+            margin: 0 0 6px;
+            color: var(--ink);
+        }
+        h2 {
+            font-size: 19px;
+            font-weight: 700;
+            margin: 36px 0 10px;
+            color: var(--ink);
+            border-left: 4px solid var(--accent);
+            padding-left: 12px;
+        }
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 22px 0 8px;
+            color: var(--ink);
+        }
+        p, li {
+            font-size: 15px;
+            color: var(--ink);
+        }
+        .meta {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+        .pill {
+            display: inline-block;
+            background: var(--accent);
+            color: var(--ink);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1.5px solid var(--border);
+        }
+        ul { padding-left: 22px; }
+        li { margin: 4px 0; }
+        a { color: var(--border); font-weight: 600; }
+        code {
+            background: var(--card);
+            border: 1px solid rgba(85, 107, 47, 0.30);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .callout {
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 18px;
+            margin: 20px 0;
+        }
+        .callout strong { color: var(--border); }
+        footer {
+            margin-top: 48px;
+            border-top: 1px solid rgba(85, 107, 47, 0.30);
+            padding-top: 18px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+        @media (max-width: 480px) {
+            h1 { font-size: 26px; }
+            h2 { font-size: 17px; }
+            p, li { font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <span class="pill">Privacy Policy</span>
+        <h1>How VerbaDoc handles your study data</h1>
+        <p class="meta">Last updated: January 2026 &mdash; Effective immediately upon publication.</p>
+    </header>
+
+    <div class="callout">
+        <strong>The short version.</strong> VerbaDoc collects the minimum data needed to power your AI study tools:
+        your account email, the documents you upload to generate cards, and anonymous usage analytics.
+        We do <strong>not</strong> sell your data. We do <strong>not</strong> train third-party AI
+        models on your documents. You can permanently delete your account at any time.
+    </div>
+
+    <h2>1. Who we are</h2>
+    <p>
+        VerbaDoc is an AI-powered study app for high-school and college students, available on iOS
+        through the Apple App Store. The app is operated by an individual developer &mdash; Zoey
+        Ding ("we", "us"). Contact: <a href="mailto:privacy@verbadoc.app">privacy@verbadoc.app</a>.
+    </p>
+
+    <h2>2. Data we collect</h2>
+
+    <h3>2.1 Account data</h3>
+    <p>
+        When you sign up, we collect your email address and a salted cryptographic hash of your
+        password. If you sign in with Apple, we receive a stable Apple user identifier and the
+        email you choose to share (or Apple's hidden relay address). You do not need to provide
+        your real name.
+    </p>
+
+    <h3>2.2 Document content you upload</h3>
+    <p>
+        When you upload a PDF, photo, YouTube link, or paste notes, we send that content to our
+        AI generation backend (hosted on Supabase Edge Functions powered by Groq and Google
+        Gemini) so we can return flashcards, quizzes, and study guides. The content is
+        transmitted over HTTPS, processed in-memory by the AI model, and discarded after the
+        response is returned. We do not use your documents to train any third-party AI model,
+        and we configure our provider accounts to disable training-data retention where the
+        provider offers that control.
+    </p>
+
+    <h3>2.3 Generated study material</h3>
+    <p>
+        The flashcards, quizzes, open-answer questions, and study guides generated from your
+        documents are stored in our database so that you can access them across devices and so
+        that they survive reinstalls.
+    </p>
+
+    <h3>2.4 Study session analytics</h3>
+    <p>
+        We collect anonymous, privacy-respecting analytics: study-session start and end
+        timestamps, number of cards reviewed per session, streak milestones, share-action clicks,
+        and crash reports. These do <strong>not</strong> include the content of your answers.
+        We store a SHA-256 hash of your user identifier in the analytics log, never the
+        identifier itself.
+    </p>
+
+    <h3>2.5 Subscription data (if applicable)</h3>
+    <p>
+        If you subscribe to VerbaDoc Pro, Apple processes the payment through the App Store.
+        We receive from RevenueCat a subscription status (free / pro / expired) and the
+        entitlement identifier. We do not see or store your credit-card number, Apple ID
+        password, or any financial instrument.
+    </p>
+
+    <h3>2.6 Device &amp; diagnostic data</h3>
+    <p>
+        If a crash occurs, Apple's <code>MetricKit</code> framework collects diagnostic payloads
+        (stack trace, OS version, build identifier). We receive only the stack trace and app
+        version; we receive no document content with crash reports.
+    </p>
+
+    <h2>3. Data we do NOT collect</h2>
+    <ul>
+        <li>Your real name, unless you provide it.</li>
+        <li>Your contacts, photo library (other than photos you explicitly pick), or microphone.</li>
+        <li>Your location, browsing history, or advertising identifiers.</li>
+        <li>The content of your study-session answers beyond aggregate counts.</li>
+        <li>Any third-party tracking pixels or cross-app identifiers.</li>
+    </ul>
+
+    <h2>4. How we use your data</h2>
+    <p>We use the collected data only for the following purposes:</p>
+    <ul>
+        <li><strong>To provide the service.</strong> Generate your flashcards, run study sessions, sync across your devices, send the notifications you opt into.</li>
+        <li><strong>To improve the product.</strong> Aggregate analytics help us understand which study modes are working and where users get stuck.</li>
+        <li><strong>To respond to support requests.</strong> If you email us, we use your email to reply.</li>
+        <li><strong>To comply with law.</strong> We retain the minimum data required to satisfy Apple App Store guidelines, tax obligations, and valid legal process.</li>
+    </ul>
+
+    <h2>5. Where your data lives</h2>
+    <p>
+        Account, decks, session logs, and study history are stored in a Supabase-hosted
+        PostgreSQL database in the United States. Analytics are stored in your device's local
+        Application Support directory and never uploaded to our servers in their raw form.
+        Crash diagnostics are stored in Apple's developer portal. AI generation is processed
+        by Groq (US region) and Google Gemini (US region) in real time; the providers do
+        not retain content beyond request scope per their enterprise-data terms.
+    </p>
+
+    <h2>6. Sharing your data</h2>
+    <p>
+        We do not sell, rent, or trade your data. We share data only with the following
+        processors, each bound by a Data Processing Agreement:
+    </p>
+    <ul>
+        <li><strong>Supabase, Inc.</strong> &mdash; database, authentication.</li>
+        <li><strong>Groq, Inc.</strong> &mdash; AI generation (Llama 3, content discarded per request).</li>
+        <li><strong>Google LLC (Gemini)</strong> &mdash; AI generation fallback (content discarded per request).</li>
+        <li><strong>RevenueCat, Inc.</strong> &mdash; subscription entitlement state.</li>
+        <li><strong>Apple, Inc.</strong> &mdash; App Store payment processing, crash diagnostics.</li>
+    </ul>
+    <p>
+        We may disclose information if compelled by valid legal process, in which case we will
+        notify you unless legally prohibited from doing so.
+    </p>
+
+    <h2>7. Your rights &amp; controls</h2>
+
+    <h3>7.1 Account deletion</h3>
+    <p>
+        You can permanently delete your VerbaDoc account at any time by opening
+        <strong>Settings &rarr; Account &rarr; Delete Account</strong>. Deletion removes your
+        account, decks, study history, and analytics within 7 days. Backups are purged within
+        30 days.
+    </p>
+
+    <h3>7.2 Data export</h3>
+    <p>
+        Email <a href="mailto:privacy@verbadoc.app">privacy@verbadoc.app</a> with the subject
+        "data export" and we will provide a JSON archive of your decks, sessions, and study
+        history within 7 days.
+    </p>
+
+    <h3>7.3 Notification preferences</h3>
+    <p>
+        You can disable any reminder category individually in
+        <strong>Settings &rarr; Notifications</strong>. Disabling the OS-level permission is
+        available through iOS Settings &rarr; VerbaDoc &rarr; Notifications.
+    </p>
+
+    <h3>7.4 Parental requests</h3>
+    <p>
+        If a parent or guardian wishes to review, correct, or delete a minor's data, email
+        <a href="mailto:privacy@verbadoc.app">privacy@verbadoc.app</a> from the email used
+        to create the account. We respond within 7 days.
+    </p>
+
+    <h2>8. Children</h2>
+    <p>
+        VerbaDoc is intended for students aged 13 and older. We do not knowingly collect data
+        from children under 13. If you believe a child under 13 has created an account, email
+        <a href="mailto:privacy@verbadoc.app">privacy@verbadoc.app</a> and we will delete
+        the account within 7 days.
+    </p>
+
+    <h2>9. Security</h2>
+    <p>
+        All data in transit is encrypted via HTTPS / TLS 1.2+. Authentication tokens are stored
+        in the iOS Keychain with hardware-backed encryption where available. Database access
+        is restricted by row-level security policies. We conduct periodic access reviews.
+    </p>
+
+    <h2>10. International users (GDPR / CCPA)</h2>
+    <p>
+        If you are in the European Economic Area, you have the right to access, correct, port,
+        restrict, or delete your data, and to object to processing or withdraw consent. To
+        exercise any of these rights, contact
+        <a href="mailto:privacy@verbadoc.app">privacy@verbadoc.app</a>. If you are a California
+        resident, you may request a list of the categories of personal information disclosed
+        to third parties in the preceding calendar year.
+    </p>
+
+    <h2>11. Changes to this policy</h2>
+    <p>
+        We will post material changes in-app and update the "Last updated" date above.
+        Continued use of VerbaDoc after the effective date constitutes acceptance.
+    </p>
+
+    <h2>12. Contact</h2>
+    <p>
+        Email <a href="mailto:privacy@verbadoc.app">privacy@verbadoc.app</a> with any
+        questions, concerns, or requests. We aim to respond within 7 days.
+    </p>
+
+    <footer>
+        <p>
+            VerbaDoc &middot; Built for students, by a student.
+            This document is informational and does not constitute legal advice.
+        </p>
+    </footer>
+
+</div>
+</body>
+</html>
