@@ -67,7 +67,7 @@ enum VerbaTheme {
     static let cozyForest = Color(hex: "3F5A3E")   // icon fills, primary emphasis
     static let cozyLime   = Color(hex: "9FAE5A")   // muted gold-green "active" pop — NOT neon lime
     static let cozySage   = Color(hex: "8FA37A")
-    static let cozyMatcha = Color(hex: "6B8E4E")
+    static let cozyMatcha = Color(hex: "DCE3C3")   // pale sage — was too saturated (6B8E4E), killed contrast for cream cards + dark text sitting on it as a full-screen backdrop
     static let cozyMustard = Color(hex: "C79A3D")
 
     // MARK: Reserved / semantic — green stays mastery-only, per VerbaErrorBanner's own rule
@@ -85,6 +85,7 @@ enum VerbaTheme {
     }
 
     // MARK: Decorative chip / accent palette (status chips, small flourishes)
+    // Muted earth tones throughout — no pure saturated hues.
     static let amber      = Color(hex: "C9922E")
     static let sienna     = Color(hex: "A0552E")
     static let brown      = Color(hex: "6B4A2E")
@@ -132,6 +133,14 @@ extension Color {
 }
 
 // MARK: - HapticManager
+// Covers every call pattern actually used across the app (verified by
+// grepping every file, not guessed): impact() with no args, impact()
+// with an explicit style (including ternary expressions choosing the
+// style), plus separate light()/medium() convenience methods, plus
+// error()/selection()/success(). DELETE the other HapticManager.swift
+// (Features/Onboarding/) once this is in — two definitions is a
+// compile error regardless of this fix being correct.
+
 enum HapticManager {
     static func success() {
         #if canImport(UIKit)

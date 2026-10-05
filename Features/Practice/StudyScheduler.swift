@@ -44,6 +44,16 @@ enum StudyScheduler {
             item.stabilityDays    = 1.0
             item.consecutiveMisses += 1
             item.mastery          = max(0, item.mastery - masteryLoss(for: item))
+            // Real SM-2 resets the repetition count to 0 on any lapse, so
+            // the NEXT correct answer restarts the proper 1-day -> 6-day ->
+            // EF-multiplied growth sequence. `reviewCount += 1` below runs
+            // unconditionally for both branches, so this is set to -1 here
+            // (not 0) to land exactly on 0 after that increment. Without
+            // this, reviewCount kept climbing regardless of right/wrong, so
+            // a card missed after 5 successful reviews would jump straight
+            // to `stabilityDays * easeFactor` on its next correct answer
+            // instead of properly restarting at 1 day.
+            item.reviewCount = -1
         }
 
         // Update ease factor — SM-2 formula

@@ -24,7 +24,7 @@ struct CapySurfersEntryView: View {    @StateObject private var state = CapySurf
     // trigger success chime.
     @State private var bankBaseline : Double = 0
 
-    @Query private var allDocuments: [Document] 
+    @Query private var allDocuments: [Document]
 
     var body: some View {
         CozyBackdrop {
@@ -130,6 +130,7 @@ struct CapySurfersEntryView: View {    @StateObject private var state = CapySurf
                             } label: {
                                 HStack(spacing: 8) {
                                     Image(systemName: "play.fill")
+                                        .accessibilityHidden(true)
                                     Text("Surf Now")
                                         .font(.system(size: 17, weight: .black, design: .rounded))
                                         .lineLimit(1)
@@ -148,6 +149,7 @@ struct CapySurfersEntryView: View {    @StateObject private var state = CapySurf
                             } label: {
                                 HStack(spacing: 6) {
                                     ShopCartIconView(size: 16, color: VerbaTheme.cozyForest)
+                                        .accessibilityHidden(true)
                                     Text("Shop")
                                         .font(.system(size: 15, weight: .bold, design: .rounded))
                                         .lineLimit(1)
@@ -176,6 +178,7 @@ struct CapySurfersEntryView: View {    @StateObject private var state = CapySurf
                                 Image(systemName: "leaf.fill")
                                     .font(.system(size: 13, weight: .bold, design: .rounded))
                                     .foregroundStyle(VerbaTheme.cozyForest)
+                                    .accessibilityHidden(true)
                                 Text("Top Up")
                                     .font(.system(size: 13, weight: .bold, design: .rounded))
                                     .foregroundStyle(VerbaTheme.cozyForest)

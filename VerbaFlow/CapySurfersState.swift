@@ -683,10 +683,27 @@ final class CapySurfersState: ObservableObject {
     }
 
     private func makeTrueFalse(from item: StudyItem, bonus: Bool) -> StudyChallenge {
-        let flag = Double.random(in: 0...1) < 0.70   // 70% the statement is true
+        var flag = Double.random(in: 0...1) < 0.70   // 70% the statement is true
+
+        // Real wrong answer from another item, not a nonsense mash-up.
+        let wrongPool = questionPool.filter { $0.id != item.id && $0.answer != item.answer }
+        let falseAnswer = wrongPool.randomElement()?.answer
+
+        // Thin deck with no genuine wrong answer available — force true
+        // rather than show the item's own correct answer under a false
+        // claim, which would be self-contradictory.
+        if falseAnswer == nil { flag = true }
+
+        let shownAnswer = flag ? item.answer : falseAnswer!
+
+        // Phrased as a checkable claim regardless of whether `question`
+        // is itself a Wh-question or a statement — concatenating "True
+        // or False:" directly onto a Wh-question produced nonsense like
+        // "True or False: What is elaborative interrogation?"
+        let prompt = "\(item.question)\n\nProposed answer: \(shownAnswer)"
+
         return .init(kind: .trueFalse(isTrue: flag),
-                     prompt: "True or False: " + item.question,
-                     topic: item.topic, itemID: item.id, isBonus: bonus)
+                     prompt: prompt, topic: item.topic, itemID: item.id, isBonus: bonus)
     }
 
     private func makeFlashcard(from item: StudyItem, bonus: Bool) -> StudyChallenge {
